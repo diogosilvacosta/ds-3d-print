@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --bg: #121212; --red: #ff4d4d; --card: #1e1e1e; --text: #e0e0e0; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .login-box, .admin-panel { max-width: 400px; margin: 0 auto; background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--red); }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; box-sizing: border-box; }
+        input { background: #333; color: white; }
+        button { background: var(--red); color: white; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        .item-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding: 10px 0; }
+        .btn-delete { background: #555; width: auto; padding: 5px 10px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section" class="login-box">
+        <h2>Admin Diogo 🔴</h2>
+        <input type="text" id="user" placeholder="Utilizador">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="checkLogin()">Entrar</button>
+    </div>
+
+    <div id="admin-section" class="admin-panel hidden">
+        <h3>Nova Peça 🚀</h3>
+        <input type="text" id="nome" placeholder="Nome da Peça">
+        <input type="number" id="gramas" placeholder="Gramas">
+        <input type="number" id="tempo" placeholder="Minutos">
+        <label>Foto da Peça:</label>
+        <input type="file" id="foto" accept="image/*" capture="environment">
+        <button id="btn-upload" onclick="uploadPeca()">ENVIAR PARA O SITE</button>
+        
+        <hr>
+        <h3>Gerir Catálogo</h3>
+        <div id="lista-pecas">Carregando...</div>
+    </div>
+
+    <script>
+        const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        function checkLogin() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(u === "AdminDiogo" && p === "Benfica1904&") {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('admin-section').classList.remove('hidden');
+                carregarLista();
+            } else { alert("Acesso Negado!"); }
+        }
+
+        async function uploadPeca() {
+            const btn = document.getElementById('btn-upload');
+            const file = document.getElementById('foto').files[0];
+            const nome = document.getElementById('nome').value;
+            const gramas = document.getElementById('gramas').value;
+            const tempo = document.getElementById('tempo').value;
+
+            if(!file || !nome) return alert("Preenche tudo!");
+            
+            btn.innerText = "A enviar...";
+            btn.disabled = true;
+
+            const fileName = `${Date.now()}.jpg`;
+            const { data: uploadData, error: uploadError } = await _supabase.storage
+                .from('fotos_pecas').upload(fileName, file);
+
+            if(uploadError) return alert("Erro no Upload");
+
+            const imgUrl = `${SB_URL}/storage/v1/object/public/fotos_pecas/${fileName}`;
+            const preco = (gramas * 0.02 + (tempo/60) * 0.15) * 3;
+
+            await _supabase.from('pecas_portfolio').insert({
+                nome_peca: nome, gramas_usadas: gramas, tempo_impressao: tempo,
+                preco_sugerido: preco.toFixed(2), foto_url: imgUrl
+            });
+
+            alert("Peça adicionada!");
+            location.reload();
+        }
+
+        async function carregarLista() {
+            const { data } = await _supabase.from('pecas_portfolio').select('*');
+            const div = document.getElementById('lista-pecas');
+            div.innerHTML = data.map(p => `
+                <div class="item-admin">
+                    <span>${p.nome_peca}</span>
+                    <button class="btn-delete" onclick="apagarPeca('${p.id}')">Apagar</button>
+                </div>
+            `).join('');
+        }
+
+        async function apagarPeca(id) {
+            if(confirm("Apagar mesmo?")) {
+                await _supabase.from('pecas_portfolio').delete().eq('id', id);
+                carregarLista();
+            }
+        }
+    </script>
+</body>
+</html>
