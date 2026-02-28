@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS 3D PRINT | Engenharia & Design</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: #141414;
+            --text: #ffffff;
+            --accent: #ff4d4d;
+            --accent-hover: #cc0000;
+            --gray: #888;
+        }
+
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; scroll-behavior: smooth; overflow-x: hidden; }
+
+        .hero {
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/fundo.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 20px;
+        }
+
+        .logo-hero { max-height: 150px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--accent)); }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); margin: 0; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+        .hero .slogan { font-size: 1.2rem; color: var(--accent); font-weight: 300; margin-top: 15px; text-transform: uppercase; letter-spacing: 5px; }
+        
+        .hero-btns { display: flex; gap: 15px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+        .btn-main { background: var(--accent); color: white; padding: 18px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: 0.3s; text-transform: uppercase; border: none; cursor: pointer; }
+        .btn-secondary { background: transparent; color: white; padding: 18px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 2px solid white; transition: 0.3s; text-transform: uppercase; cursor: pointer; }
+        .btn-main:hover { background: var(--accent-hover); transform: translateY(-3px); }
+        .btn-secondary:hover { background: white; color: black; transform: translateY(-3px); }
+
+        section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 50px; }
+        .section-title h2 { font-size: 2.2rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .section-title .line { width: 60px; height: 4px; background: var(--accent); margin: 0 auto; }
+
+        /* ESTILO DOS SEPARADORES (FILTROS) */
+        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+        .filter-btn { 
+            background: #1a1a1a; color: white; border: 1px solid #333; 
+            padding: 10px 25px; cursor: pointer; border-radius: 4px; 
+            transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .filter-btn:hover { border-color: var(--accent); }
+        .filter-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(255, 77, 77, 0.4); }
+
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .feature-card { background: var(--card-bg); padding: 35px; border-radius: 8px; border: 1px solid #222; transition: 0.3s; }
+        .feature-card i { font-size: 2rem; color: var(--accent); margin-bottom: 20px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        .card { background: var(--card-bg); border: 1px solid #222; transition: 0.4s; overflow: hidden; }
+        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; }
+        .card-info { padding: 20px; }
+        .card-nome { font-size: 1rem; font-weight: bold; text-transform: uppercase; color: #fff; }
+        .preco-tag { font-size: 1.5rem; color: var(--accent); font-weight: 800; margin: 10px 0; }
+        .order-box { background: #000; padding: 15px; margin-top: 15px; border: 1px solid #222; }
+        .input-dark { background: #111; border: 1px solid #333; color: white; padding: 10px; width: 100%; box-sizing: border-box; margin-top: 5px; outline: none; }
+        .btn-order { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; transition: 0.3s; }
+
+        footer { padding: 60px 20px; background: #000; text-align: center; border-top: 1px solid #222; }
+        .wa-footer { color: #25d366; font-size: 1.8rem; text-decoration: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; }
+
+        @media (max-width: 768px) {
+            .hero { background-attachment: scroll; }
+            .hero h1 { font-size: 2.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <img src="https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/logo.png" class="logo-hero" alt="DS 3D PRINT">
+        <h1>DS 3D PRINT</h1>
+        <div class="slogan">VOCÊ PENSA, NÓS FAZEMOS</div>
+        <div class="hero-btns">
+            <a href="#portfolio" class="btn-main">Projetos Realizados</a>
+            <a href="https://wa.me/351911780404" class="btn-secondary">Orçamento Directo</a>
+        </div>
+    </div>
+
+    <section>
+        <div class="section-title">
+            <h2>Engenharia & Soluções</h2>
+            <div class="line"></div>
+        </div>
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-tools"></i>
+                <h3>Engenharia Reversa</h3>
+                <p>Digitalização e reconstrução de componentes técnicos desgastados com precisão industrial.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-industry"></i>
+                <h3>Produção em Série</h3>
+                <p>Impressão de pequenas e médias quantidades com consistência garantida pela tecnologia Bambu Lab.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-drafting-pencil"></i>
+                <h3>Prototipagem</h3>
+                <p>Transformamos os teus modelos CAD em peças reais para testes funcionais em tempo recorde.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio">
+        <div class="section-title">
+            <h2>Catálogo de Projetos</h2>
+            <div class="line"></div>
+        </div>
+
+        <div class="filters" id="category-filters">
+            <button class="filter-btn active" onclick="filtrar('Todas', this)">Todas</button>
+        </div>
+
+        <div class="grid" id="portfolio-grid">
+            <p style="grid-column: 1/-1; text-align: center; color: var(--gray);">A sincronizar com a base de dados...</p>
+        </div>
+    </section>
+
+    <footer>
+        <h2>Dá vida à tua ideia</h2>
+        <p style="color: var(--gray);">Diogo Silva | Gestão de Produção 3D</p>
+        <a href="https://wa.me/351911780404" class="wa-footer">
+            <i class="fab fa-whatsapp"></i> 911 780 404
+        </a>
+        <p style="margin-top: 40px; color: #333; font-size: 0.75rem; letter-spacing: 2px;">© 2024 DS 3D PRINT | TECNOLOGIA EM MOVIMENTO</p>
+    </footer>
+
+    <script>
+        const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        let todasAsPecas = [];
+
+        async function carregar() {
+            const grid = document.getElementById('portfolio-grid');
+            const filterContainer = document.getElementById('category-filters');
+            
+            try {
+                const { data, error } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                
+                todasAsPecas = data;
+
+                // Criar filtros baseados nas categorias existentes no banco
+                const categoriasUnicas = [...new Set(data.map(p => p.categoria).filter(c => c && c !== 'Geral'))];
+                
+                filterContainer.innerHTML = `<button class="filter-btn active" onclick="filtrar('Todas', this)">Todas</button>`;
+                filterContainer.innerHTML += `<button class="filter-btn" onclick="filtrar('Geral', this)">Geral</button>`;
+                
+                categoriasUnicas.forEach(cat => {
+                    filterContainer.innerHTML += `<button class="filter-btn" onclick="filtrar('${cat}', this)">${cat}</button>`;
+                });
+
+                renderizarGrid(data);
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center;">Erro de conexão.</p>`;
+            }
+        }
+
+        function filtrar(categoria, btn) {
+            // Atualizar botões
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Filtrar lista
+            const filtradas = (categoria === 'Todas') 
+                ? todasAsPecas 
+                : todasAsPecas.filter(p => p.categoria === categoria);
+            
+            renderizarGrid(filtradas);
+        }
+
+        function renderizarGrid(lista) {
+            const grid = document.getElementById('portfolio-grid');
+            if (lista.length === 0) {
+                grid.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Sem projetos nesta categoria.</p>";
+                return;
+            }
+
+            grid.innerHTML = lista.map(p => `
+                <div class="card">
+                    <img src="${p.foto_url}" onerror="this.src='https://via.placeholder.com/400x400/111/333?text=DS+3D+PRINT'">
+                    <div class="card-info">
+                        <div class="card-nome">${p.nome_peca}</div>
+                        <div class="preco-tag">${p.preco_sugerido}€</div>
+                        <div class="order-box">
+                            <label style="font-size:0.7rem; color:#888; text-transform:uppercase;">Quantidade</label>
+                            <input type="number" id="qtd-${p.id}" value="1" min="1" class="input-dark">
+                            ${p.permite_cor ? `
+                                <label style="font-size:0.7rem; color:#888; text-transform:uppercase; display:block; margin-top:10px;">Cor Pretendida</label>
+                                <input type="text" id="cor-${p.id}" placeholder="Ex: Preto, Branco..." class="input-dark">
+                            ` : ''}
+                        </div>
+                        <button onclick="encomendar('${p.nome_peca.replace(/'/g, "\\'")}', '${p.id}', ${p.preco_sugerido})" class="btn-order">Solicitar Fabrico</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function encomendar(nome, id, preco) {
+            const qtd = document.getElementById(`qtd-${id}`).value;
+            const cor = document.getElementById(`cor-${id}`) ? document.getElementById(`cor-${id}`).value : "";
+            const total = (qtd * preco).toFixed(2);
+            let msg = `Olá Diogo! Gostaria de solicitar o fabrico de:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Quantidade:* ${qtd}\n`;
+            if(cor) msg += `🎨 *Cor:* ${cor}\n`;
+            msg += `💰 *Investimento Total:* ${total}€`;
+            window.open(`https://wa.me/351911780404?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        carregar();
+    </script>
+</body>
+</html>
