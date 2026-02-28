@@ -20,7 +20,7 @@
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
-        /* HERO - RECUPERANDO O VISUAL IMPACTANTE */
+        /* HERO */
         .hero {
             height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
             background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
@@ -31,7 +31,7 @@
         h1 { font-size: clamp(2rem, 8vw, 3.5rem); margin: 0; font-weight: 900; letter-spacing: -1px; }
         .slogan { color: var(--accent); font-size: 1rem; letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; opacity: 0.8; }
 
-        /* FILTROS E SEÇÕES */
+        /* FILTROS */
         section { padding: 40px 15px; max-width: 1200px; margin: 0 auto; }
         .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
         .filter-btn { 
@@ -40,33 +40,20 @@
         }
         .filter-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(255,77,77,0.3); }
 
-        /* GRID DE ARTIGOS */
+        /* GRID */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
         .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; }
         .card:hover { border-color: var(--accent); transform: translateY(-5px); }
 
-        /* CARROSSEL TÉCNICO - CORREÇÃO DAS FOTOS */
+        /* CARROSSEL */
         .carousel { position: relative; width: 100%; aspect-ratio: 1; background: #fff; }
         .carousel-track {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none; /* Firefox */
+            display: flex; width: 100%; height: 100%; overflow-x: auto;
+            scroll-snap-type: x mandatory; scrollbar-width: none;
         }
-        .carousel-track::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .carousel-track::-webkit-scrollbar { display: none; }
+        .carousel-track img { min-width: 100%; max-width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; background: #fff; }
 
-        .carousel-track img {
-            min-width: 100%; /* GARANTE QUE CADA FOTO OCUPA O CARTÃO TODO */
-            max-width: 100%;
-            height: 100%;
-            object-fit: contain;
-            scroll-snap-align: start;
-            background: #fff;
-        }
-
-        /* PONTINHOS (DOTS) */
         .dots {
             position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 6px; z-index: 5; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 20px;
@@ -74,15 +61,30 @@
         .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
         .dot.active { background: var(--accent); width: 15px; border-radius: 4px; }
 
-        /* INFO E BOTÕES */
+        /* INFO ARTIGO */
         .card-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         .card-nome { font-size: 1rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; }
         .preco { font-size: 1.6rem; color: var(--accent); font-weight: 900; margin-bottom: 15px; }
-
         .order-row { display: flex; gap: 10px; align-items: center; }
         .qty { width: 60px; background: #000; border: 1px solid #333; color: white; padding: 12px 5px; text-align: center; border-radius: 6px; font-weight: bold; }
         .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 6px; font-size: 0.8rem; transition: 0.3s; }
-        .btn-order:hover { background: var(--accent-hover); }
+
+        /* SECÇÃO MAKERWORLD */
+        .maker-section {
+            margin-top: 60px;
+            background: linear-gradient(145deg, #111, #080808);
+            border: 2px dashed #333;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .maker-section:hover { border-color: var(--accent); }
+        .maker-title { color: var(--accent); font-weight: 900; text-transform: uppercase; margin-bottom: 15px; font-size: 1.5rem; }
+        .maker-text { color: var(--gray); margin-bottom: 30px; font-size: 1rem; line-height: 1.5; }
+        .maker-btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn-maker { background: #fff; color: #000; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
+        .btn-maker-wa { background: #25D366; color: #fff; border: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; cursor: pointer; }
 
         footer { text-align: center; padding: 50px; border-top: 1px solid #111; color: #444; font-size: 0.8rem; letter-spacing: 2px; }
     </style>
@@ -97,8 +99,22 @@
 
     <section id="portfolio">
         <div class="filters" id="category-filters"></div>
+        
         <div class="grid" id="portfolio-grid">
             <p style="text-align: center; grid-column: 1/-1;">Sincronizando catálogo...</p>
+        </div>
+
+        <div class="maker-section">
+            <h2 class="maker-title">Procuras algo diferente?</h2>
+            <p class="maker-text">Explora milhões de modelos 3D no <b>MakerWorld</b>.<br>Escolhe o teu projeto favorito, envia-nos o link e nós imprimimos para ti!</p>
+            <div class="maker-btns">
+                <a href="https://makerworld.com/" target="_blank" class="btn-maker">
+                    <i class="fas fa-external-link-alt"></i> Abrir MakerWorld
+                </a>
+                <button onclick="enviarLinkMaker()" class="btn-maker-wa">
+                    <i class="fab fa-whatsapp"></i> Pedir Orçamento via Link
+                </button>
+            </div>
         </div>
     </section>
 
@@ -117,7 +133,6 @@
             const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
             todasAsPecas = data;
             
-            // Filtros Dinâmicos
             const cats = [...new Set(data.map(p => p.categoria).filter(c => c && c !== 'Geral'))];
             const filterDiv = document.getElementById('category-filters');
             filterDiv.innerHTML = `<button class="filter-btn active" onclick="filtrar('Todas', this)">Todas</button><button class="filter-btn" onclick="filtrar('Geral', this)">Geral</button>`;
@@ -175,6 +190,11 @@
             const qtd = document.getElementById(`qtd-${id}`).value;
             const total = (qtd * preco).toFixed(2);
             window.open(`https://wa.me/351911780404?text=Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${total}€`, '_blank');
+        }
+
+        function enviarLinkMaker() {
+            const msg = `Olá Diogo! Encontrei um modelo no MakerWorld e gostava de saber o orçamento para impressão:\n\n🔗 *Link:* (Cola aqui o link do modelo)`;
+            window.open(`https://wa.me/351911780404?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         carregar();
