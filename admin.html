@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Pro - DS 3D PRINT</title>
+    <title>Admin Pro + Calculadora | DS 3D PRINT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -17,6 +17,11 @@
         button { background: var(--red); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .hidden { display: none; }
         
+        /* CALCULADORA */
+        .calc-box { background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #444; margin: 15px 0; }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sugestao { color: #25D366; font-weight: bold; font-size: 0.8rem; margin-top: 5px; display: block; text-align: center; }
+
         /* Toggle Switch */
         .switch-container { display: flex; align-items: center; justify-content: space-between; background: #222; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #333; }
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
@@ -59,7 +64,25 @@
         
         <label>Nome:</label>
         <input type="text" id="nome" placeholder="Ex: Vaso Geométrico">
+
+        <div class="calc-box">
+            <label style="color:var(--red); margin-bottom: 5px;">Calculadora de Engenharia:</label>
+            <div class="calc-grid">
+                <div>
+                    <label>Tempo (Horas):</label>
+                    <input type="number" id="calc-horas" placeholder="0" oninput="calcularPreco()">
+                </div>
+                <div>
+                    <label>Peso (Gramas):</label>
+                    <input type="number" id="calc-gramas" placeholder="0" oninput="calcularPreco()">
+                </div>
+            </div>
+            <span class="sugestao" id="sugestao-valor">Sugestão: 0.00€</span>
+        </div>
         
+        <label>Preço Final (€):</label>
+        <input type="number" id="preco_manual" step="0.01" placeholder="0.00">
+
         <label>Categoria:</label>
         <select id="categoria">
             <option value="Geral">Geral</option>
@@ -67,9 +90,6 @@
             <option value="Decoração">Decoração</option>
             <option value="Brinquedos">Brinquedos</option>
         </select>
-
-        <label>Preço (€):</label>
-        <input type="number" id="preco_manual" step="0.01" placeholder="0.00">
 
         <div class="switch-container">
             <span style="font-size: 0.8rem; font-weight: bold;">LIMPAR FUNDO (IA)?</span>
@@ -100,8 +120,8 @@
         const REMOVE_BG_KEY = "KYm3knsGAoS6YhcghA9gqmwL";
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        let fotosBlobs = []; // Novas fotos
-        let fotosUrlsExistentes = []; // Fotos que já estão no Supabase
+        let fotosBlobs = []; 
+        let fotosUrlsExistentes = []; 
 
         window.onload = () => {
             if(localStorage.getItem('ds_logged') === 'true') {
@@ -118,6 +138,18 @@
                 localStorage.setItem('ds_logged', 'true');
                 location.reload();
             } else { alert("Acesso negado!"); }
+        }
+
+        // --- FUNÇÃO DA CALCULADORA ---
+        function calcularPreco() {
+            const horas = parseFloat(document.getElementById('calc-horas').value) || 0;
+            const gramas = parseFloat(document.getElementById('calc-gramas').value) || 0;
+            
+            // Fórmula sugerida: (Horas * 1.50€) + (Gramas * 0.05€) + 2€ margem fixa
+            const resultado = (horas * 1.5) + (gramas * 0.05) + 2;
+            
+            document.getElementById('sugestao-valor').innerText = `Sugestão: ${resultado.toFixed(2)}€`;
+            document.getElementById('preco_manual').value = resultado.toFixed(2);
         }
 
         async function adicionarFoto() {
@@ -152,13 +184,9 @@
         function atualizarGaleria() {
             const container = document.getElementById('gallery');
             container.innerHTML = "";
-            
-            // Fotos que já estavam no Supabase
             fotosUrlsExistentes.forEach((url, i) => {
                 container.innerHTML += `<div class="preview-item"><img src="${url}"><button class="remove-photo" onclick="removerExistente(${i})">×</button></div>`;
             });
-
-            // Fotos novas (blobs)
             fotosBlobs.forEach((f, i) => {
                 container.innerHTML += `<div class="preview-item"><img src="${URL.createObjectURL(f)}"><button class="remove-photo" onclick="removerBlob(${i})">×</button></div>`;
             });
@@ -171,7 +199,6 @@
             const nome = document.getElementById('nome').value;
             const preco = document.getElementById('preco_manual').value;
             const editId = document.getElementById('edit-id').value;
-
             if(!nome || !preco || (fotosBlobs.length === 0 && fotosUrlsExistentes.length === 0)) return alert("Dados insuficientes!");
 
             const btn = document.getElementById('btn-save');
@@ -180,7 +207,6 @@
 
             try {
                 let urlsFinais = [...fotosUrlsExistentes];
-
                 for(let f of fotosBlobs) {
                     const name = `p_${Date.now()}_${Math.random().toString(36).substr(2,5)}.jpg`;
                     await _supabase.storage.from('fotos_pecas').upload(name, f);
@@ -194,11 +220,8 @@
                     foto_url: urlsFinais.join(',')
                 };
 
-                if(editId) {
-                    await _supabase.from('pecas_portfolio').update(dados).eq('id', editId);
-                } else {
-                    await _supabase.from('pecas_portfolio').insert(dados);
-                }
+                if(editId) { await _supabase.from('pecas_portfolio').update(dados).eq('id', editId); }
+                else { await _supabase.from('pecas_portfolio').insert(dados); }
                 
                 location.reload();
             } catch (e) { alert("Erro ao guardar dados."); btn.disabled = false; }
@@ -227,20 +250,13 @@
             document.getElementById('preco_manual').value = preco;
             document.getElementById('categoria').value = cat;
             document.getElementById('btn-cancel').classList.remove('hidden');
-            
             fotosUrlsExistentes = urls.split(',').filter(u => u !== "");
             fotosBlobs = [];
             atualizarGaleria();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        async function apagar(id) {
-            if(confirm("Eliminar artigo permanentemente?")) {
-                await _supabase.from('pecas_portfolio').delete().eq('id', id);
-                carregarLista();
-            }
-        }
-
+        async function apagar(id) { if(confirm("Eliminar artigo?")) { await _supabase.from('pecas_portfolio').delete().eq('id', id); carregarLista(); } }
         function logout() { localStorage.removeItem('ds_logged'); location.reload(); }
     </script>
 </body>
