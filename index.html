@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS 3D PRINT | Engenharia & Design</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: #141414;
+            --text: #ffffff;
+            --accent: #ff4d4d;
+            --accent-hover: #cc0000;
+            --gray: #888;
+        }
+
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; scroll-behavior: smooth; }
+
+        /* 1. HERO SECTION - O IMPACTO INICIAL */
+        .hero {
+                height: 90vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                /* ALTERAÇÃO AQUI: Mudámos para o nome do teu ficheiro local */
+                background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('fundo.png');
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed; /* Dá um efeito de profundidade ao fazer scroll */
+                padding: 20px;
+            }
+
+        .logo-hero { max-height: 150px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--accent)); }
+        
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); margin: 0; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+        .hero .slogan { font-size: 1.5rem; color: var(--accent); font-weight: 300; margin-top: 10px; text-transform: uppercase; letter-spacing: 4px; }
+        
+        .hero-btns { display: flex; gap: 15px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+        
+        .btn-main { background: var(--accent); color: white; padding: 18px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: 0.3s; text-transform: uppercase; border: none; }
+        .btn-secondary { background: transparent; color: white; padding: 18px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 2px solid white; transition: 0.3s; text-transform: uppercase; }
+        
+        .btn-main:hover { background: var(--accent-hover); transform: translateY(-3px); }
+        .btn-secondary:hover { background: white; color: black; transform: translateY(-3px); }
+
+        /* 2. SECTION O QUE FAZEMOS */
+        section { padding: 100px 20px; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .section-title h2 { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        .section-title div { width: 60px; height: 4px; background: var(--accent); margin: 10px auto; }
+
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .feature-card { background: var(--card-bg); padding: 40px; border-radius: 10px; border: 1px solid #222; transition: 0.3s; }
+        .feature-card:hover { border-color: var(--accent); }
+        .feature-card i { font-size: 2.5rem; color: var(--accent); margin-bottom: 20px; }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; }
+        .feature-card p { color: var(--gray); line-height: 1.6; }
+
+        /* 3. PORTFÓLIO - GRID MODERNA */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        .card { background: var(--card-bg); border-radius: 0; overflow: hidden; border: 1px solid #222; transition: 0.4s; position: relative; }
+        .card:hover { transform: scale(1.02); border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; }
+        
+        .card-info { padding: 20px; }
+        .card-nome { font-size: 1.1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .preco-tag { font-size: 1.5rem; color: var(--accent); font-weight: 800; margin: 10px 0; }
+
+        .order-box { background: #1a1a1a; padding: 15px; margin-top: 15px; }
+        .input-dark { background: #000; border: 1px solid #333; color: white; padding: 8px; width: 100%; box-sizing: border-box; margin-top: 5px; }
+        
+        .btn-order { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
+
+        /* 4. FOOTER */
+        footer { padding: 80px 20px; background: #000; text-align: center; border-top: 1px solid #222; }
+        .wa-footer { color: #25d366; font-size: 2rem; text-decoration: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3rem; }
+            section { padding: 60px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <img src="https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/logo.png" class="logo-hero">
+        <div class="slogan">VOCÊ PENSA, NÓS FAZEMOS</div>
+        <div class="hero-btns">
+            <a href="#portfolio" class="btn-main">Ver Portfólio</a>
+            <a href="https://wa.me/351911780404" class="btn-secondary">Orçamento Rápido</a>
+        </div>
+    </div>
+
+    <section id="sobre">
+        <div class="section-title">
+            <h2>O Que Fazemos</h2>
+            <div></div>
+        </div>
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-microchip"></i>
+                <h3>Engenharia Reversa</h3>
+                <p>Digitalizamos e recriamos peças técnicas desgastadas ou inexistentes com precisão milimétrica.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-layer-group"></i>
+                <h3>Produção em Massa</h3>
+                <p>Capacidade para pequenas e médias tiragens com repetibilidade garantida pela tecnologia Bambu Lab.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-cubes"></i>
+                <h3>Protótipos Rápidos</h3>
+                <p>Reduz o ciclo de desenvolvimento do teu projeto. Do CAD para a tua mão em menos de 24 horas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio">
+        <div class="section-title">
+            <h2>Trabalhos Realizados</h2>
+            <div></div>
+        </div>
+        <div class="grid" id="portfolio-grid">
+            <p style="grid-column: 1/-1; text-align: center; color: var(--gray);">A carregar projetos...</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="section-title">
+            <h2>Pronto para começar?</h2>
+            <p>Fala diretamente com o Engenheiro responsável</p>
+        </div>
+        <a href="https://wa.me/351911780404" class="wa-footer">
+            <i class="fab fa-whatsapp"></i> 911 780 404
+        </a>
+        <p style="margin-top: 50px; color: #444; font-size: 0.8rem;">© 2024 DS 3D PRINT | TECNOLOGIA EM MOVIMENTO</p>
+    </footer>
+
+    <script>
+        const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        async function carregar() {
+            const grid = document.getElementById('portfolio-grid');
+            try {
+                const { data, error } = await _supabase.from('pecas_portfolio').select('*');
+                if (error) throw error;
+
+                grid.innerHTML = data.map(p => `
+                    <div class="card">
+                        <img src="${p.foto_url}" onerror="this.src='https://via.placeholder.com/400x400/111/333?text=DS+3D+PRINT'">
+                        <div class="card-info">
+                            <div class="card-nome">${p.nome_peca}</div>
+                            <div class="preco-tag">${p.preco_sugerido}€</div>
+                            <div class="order-box">
+                                <label style="font-size:0.7rem; color:#888; text-transform:uppercase;">Quantidade</label>
+                                <input type="number" id="qtd-${p.id}" value="1" min="1" class="input-dark">
+                                ${p.permite_cor ? `
+                                    <label style="font-size:0.7rem; color:#888; text-transform:uppercase; display:block; margin-top:10px;">Cor Pretendida</label>
+                                    <input type="text" id="cor-${p.id}" placeholder="Ex: Preto, Azul..." class="input-dark">
+                                ` : ''}
+                            </div>
+                            <button onclick="encomendar('${p.nome_peca.replace(/'/g, "\\'")}', '${p.id}', ${p.preco_sugerido})" class="btn-order">Encomendar Projeto</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center;">Erro ao carregar catálogo.</p>`;
+            }
+        }
+
+        function encomendar(nome, id, preco) {
+            const qtd = document.getElementById(`qtd-${id}`).value;
+            const cor = document.getElementById(`cor-${id}`) ? document.getElementById(`cor-${id}`).value : "";
+            const total = (qtd * preco).toFixed(2);
+            let msg = `Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Quantidade:* ${qtd}\n`;
+            if(cor) msg += `🎨 *Cor:* ${cor}\n`;
+            msg += `💰 *Investimento Total:* ${total}€`;
+            window.open(`https://wa.me/351911780404?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        carregar();
+    </script>
+</body>
+</html>
