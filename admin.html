@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Pro - DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --bg: #0c0c0c; --red: #ff4d4d; --card: #161616; --text: #e0e0e0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .admin-panel { max-width: 500px; margin: 0 auto; background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid #222; }
+        h2, h3 { color: var(--red); text-align: center; margin-top: 0; text-transform: uppercase; }
+        input, button, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; box-sizing: border-box; font-size: 1rem; }
+        input, select { background: #1a1a1a; color: white; border: 1px solid #333; }
+        label { font-size: 0.7rem; color: #888; display: block; margin-top: 10px; text-transform: uppercase; font-weight: bold; }
+        button { background: var(--red); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .hidden { display: none; }
+        
+        /* Toggle Switch */
+        .switch-container { display: flex; align-items: center; justify-content: space-between; background: #222; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #333; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--red); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Galeria */
+        .preview-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .preview-item { position: relative; border: 1px solid #333; border-radius: 4px; overflow: hidden; height: 100px; background: #000; }
+        .preview-item img { width: 100%; height: 100%; object-fit: contain; background: white; }
+        .remove-photo { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; }
+        
+        /* Lista */
+        .item-admin { display: flex; align-items: center; border-bottom: 1px solid #222; padding: 12px 0; gap: 12px; }
+        .item-admin img { width: 50px; height: 50px; object-fit: contain; background: white; border-radius: 4px; }
+        .actions { display: flex; gap: 6px; }
+        .btn-edit { background: #333; width: auto; padding: 6px 12px; font-size: 0.8rem; }
+        .btn-del { background: #1a1a1a; border: 1px solid #333; width: auto; padding: 6px 12px; font-size: 0.8rem; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section" class="admin-panel">
+        <h2>DS 3D Admin 🔴</h2>
+        <input type="text" id="user" placeholder="Utilizador">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="checkLogin()">ENTRAR</button>
+    </div>
+
+    <div id="admin-section" class="admin-panel hidden">
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h3 id="form-title">Novo Artigo</h3>
+            <button onclick="logout()" style="width:auto; padding: 5px 12px; background:#222; font-size: 0.7rem;">Sair</button>
+        </div>
+        
+        <input type="hidden" id="edit-id">
+        
+        <label>Nome:</label>
+        <input type="text" id="nome" placeholder="Ex: Vaso Geométrico">
+        
+        <label>Categoria:</label>
+        <select id="categoria">
+            <option value="Geral">Geral</option>
+            <option value="Porta-chaves">Porta-chaves</option>
+            <option value="Decoração">Decoração</option>
+            <option value="Brinquedos">Brinquedos</option>
+        </select>
+
+        <label>Preço (€):</label>
+        <input type="number" id="preco_manual" step="0.01" placeholder="0.00">
+
+        <div class="switch-container">
+            <span style="font-size: 0.8rem; font-weight: bold;">LIMPAR FUNDO (IA)?</span>
+            <label class="switch">
+                <input type="checkbox" id="usar-ia" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <label>Galeria de Fotos:</label>
+        <div class="preview-gallery" id="gallery"></div>
+        
+        <input type="file" id="foto-input" accept="image/*">
+        <button id="btn-add" onclick="adicionarFoto()" style="background:#444;">ADICIONAR FOTO À GALERIA</button>
+        
+        <button id="btn-save" onclick="confirmarSalvar()" style="background:#25D366; margin-top:20px; font-size:1.1rem;">PUBLICAR / ATUALIZAR</button>
+        <button id="btn-cancel" class="hidden" onclick="location.reload()" style="background:#333;">CANCELAR EDIÇÃO</button>
+
+        <div class="item-list" style="margin-top:40px; border-top:1px solid #333;">
+            <h3>Gestão do Catálogo</h3>
+            <div id="lista-pecas">Carregando...</div>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
+        const REMOVE_BG_KEY = "KYm3knsGAoS6YhcghA9gqmwL";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        let fotosBlobs = []; // Novas fotos
+        let fotosUrlsExistentes = []; // Fotos que já estão no Supabase
+
+        window.onload = () => {
+            if(localStorage.getItem('ds_logged') === 'true') {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('admin-section').classList.remove('hidden');
+                carregarLista();
+            }
+        };
+
+        function checkLogin() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if((u === "diogo" && p === "Requiao0829") || (u === "jessica" && p === "Requiao0829")) {
+                localStorage.setItem('ds_logged', 'true');
+                location.reload();
+            } else { alert("Acesso negado!"); }
+        }
+
+        async function adicionarFoto() {
+            const file = document.getElementById('foto-input').files[0];
+            const usarIA = document.getElementById('usar-ia').checked;
+            if(!file) return alert("Selecione um ficheiro!");
+
+            const btn = document.getElementById('btn-add');
+            btn.innerText = usarIA ? "Processando IA..." : "Adicionando...";
+            btn.disabled = true;
+
+            try {
+                if(usarIA) {
+                    const formData = new FormData();
+                    formData.append("image_file", file);
+                    const resp = await fetch("https://api.remove.bg/v1.0/removebg", {
+                        method: "POST", headers: { "X-Api-Key": REMOVE_BG_KEY }, body: formData
+                    });
+                    const blob = await resp.blob();
+                    fotosBlobs.push(blob);
+                } else {
+                    fotosBlobs.push(file);
+                }
+                atualizarGaleria();
+            } catch (e) { alert("Erro ao processar foto."); }
+            
+            btn.innerText = "ADICIONAR FOTO À GALERIA";
+            btn.disabled = false;
+            document.getElementById('foto-input').value = "";
+        }
+
+        function atualizarGaleria() {
+            const container = document.getElementById('gallery');
+            container.innerHTML = "";
+            
+            // Fotos que já estavam no Supabase
+            fotosUrlsExistentes.forEach((url, i) => {
+                container.innerHTML += `<div class="preview-item"><img src="${url}"><button class="remove-photo" onclick="removerExistente(${i})">×</button></div>`;
+            });
+
+            // Fotos novas (blobs)
+            fotosBlobs.forEach((f, i) => {
+                container.innerHTML += `<div class="preview-item"><img src="${URL.createObjectURL(f)}"><button class="remove-photo" onclick="removerBlob(${i})">×</button></div>`;
+            });
+        }
+
+        function removerBlob(i) { fotosBlobs.splice(i, 1); atualizarGaleria(); }
+        function removerExistente(i) { fotosUrlsExistentes.splice(i, 1); atualizarGaleria(); }
+
+        async function confirmarSalvar() {
+            const nome = document.getElementById('nome').value;
+            const preco = document.getElementById('preco_manual').value;
+            const editId = document.getElementById('edit-id').value;
+
+            if(!nome || !preco || (fotosBlobs.length === 0 && fotosUrlsExistentes.length === 0)) return alert("Dados insuficientes!");
+
+            const btn = document.getElementById('btn-save');
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
+            try {
+                let urlsFinais = [...fotosUrlsExistentes];
+
+                for(let f of fotosBlobs) {
+                    const name = `p_${Date.now()}_${Math.random().toString(36).substr(2,5)}.jpg`;
+                    await _supabase.storage.from('fotos_pecas').upload(name, f);
+                    urlsFinais.push(`${SB_URL}/storage/v1/object/public/fotos_pecas/${name}`);
+                }
+
+                const dados = {
+                    nome_peca: nome,
+                    categoria: document.getElementById('categoria').value,
+                    preco_sugerido: parseFloat(preco).toFixed(2),
+                    foto_url: urlsFinais.join(',')
+                };
+
+                if(editId) {
+                    await _supabase.from('pecas_portfolio').update(dados).eq('id', editId);
+                } else {
+                    await _supabase.from('pecas_portfolio').insert(dados);
+                }
+                
+                location.reload();
+            } catch (e) { alert("Erro ao guardar dados."); btn.disabled = false; }
+        }
+
+        async function carregarLista() {
+            const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
+            document.getElementById('lista-pecas').innerHTML = data.map(p => {
+                const img = p.foto_url.split(',')[0];
+                return `
+                <div class="item-admin">
+                    <img src="${img}">
+                    <div style="flex:1"><b>${p.nome_peca}</b><br><small>${p.preco_sugerido}€</small></div>
+                    <div class="actions">
+                        <button class="btn-edit" onclick="editarArtigo('${p.id}', '${p.nome_peca.replace(/'/g, "\\'")}', '${p.preco_sugerido}', '${p.categoria}', '${p.foto_url}')">EDITAR</button>
+                        <button class="btn-del" onclick="apagar('${p.id}')">×</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function editarArtigo(id, nome, preco, cat, urls) {
+            document.getElementById('form-title').innerText = "Editando Artigo";
+            document.getElementById('edit-id').value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('preco_manual').value = preco;
+            document.getElementById('categoria').value = cat;
+            document.getElementById('btn-cancel').classList.remove('hidden');
+            
+            fotosUrlsExistentes = urls.split(',').filter(u => u !== "");
+            fotosBlobs = [];
+            atualizarGaleria();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function apagar(id) {
+            if(confirm("Eliminar artigo permanentemente?")) {
+                await _supabase.from('pecas_portfolio').delete().eq('id', id);
+                carregarLista();
+            }
+        }
+
+        function logout() { localStorage.removeItem('ds_logged'); location.reload(); }
+    </script>
+</body>
+</html>
