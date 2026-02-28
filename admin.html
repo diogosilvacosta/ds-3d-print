@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --bg: #121212; --red: #ff4d4d; --card: #1e1e1e; --text: #e0e0e0; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .admin-panel { max-width: 450px; margin: 0 auto; background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--red); box-shadow: 0 0 20px rgba(255, 77, 77, 0.2); }
+        h2, h3 { color: var(--red); text-align: center; margin-top: 0; }
+        input, button, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; box-sizing: border-box; font-size: 1rem; }
+        input, select { background: #2a2a2a; color: white; border: 1px solid #444; }
+        label { font-size: 0.9rem; color: #a0a0a0; display: block; margin-top: 10px; }
+        button { background: var(--red); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        .item-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding: 12px 0; }
+        .btn-delete { background: #444; width: auto; padding: 5px 15px; font-size: 0.8rem; }
+        .hidden { display: none; }
+        .checkbox-container { display: flex; align-items: center; gap: 10px; background: #2a2a2a; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #444; }
+        .checkbox-container input { width: auto; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section" class="admin-panel">
+        <h2>Admin Diogo 🔴</h2>
+        <input type="text" id="user" placeholder="Utilizador">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="checkLogin()">Entrar</button>
+    </div>
+
+    <div id="admin-section" class="admin-panel hidden">
+        <h3>Nova Peça (Cálculo Smart3D) 🚀</h3>
+        
+        <label>Nome da Peça:</label>
+        <input type="text" id="nome" placeholder="Ex: Coelho da Páscoa">
+        
+        <label>Impressora:</label>
+        <select id="maquina">
+            <option value="A1">Bambu Lab A1</option>
+            <option value="H2S">Bambu Lab H2S</option>
+        </select>
+
+        <label>Gramas de filamento:</label>
+        <input type="number" id="gramas" placeholder="Gramas totais">
+        
+        <label>Minutos de impressão:</label>
+        <input type="number" id="tempo" placeholder="Tempo total em minutos">
+        
+        <label class="checkbox-container">
+            <input type="checkbox" id="permite_cor">
+            <span>Permitir cliente escolher cor?</span>
+        </label>
+
+        <label>Tirar Foto:</label>
+        <input type="file" id="foto" accept="image/*" capture="environment">
+        
+        <button id="btn-upload" onclick="processarEUpload()">ENVIAR PARA O SITE</button>
+        
+        <hr style="border: 0.5px solid #333; margin: 25px 0;">
+        <h3>Gerir Catálogo</h3>
+        <div id="lista-pecas">Carregando...</div>
+    </div>
+
+    <script>
+        const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
+        const REMOVE_BG_KEY = "KYm3knsGAoS6YhcghA9gqmwL";
+
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        function checkLogin() {
+            if(document.getElementById('user').value === "AdminDiogo" && 
+               document.getElementById('pass').value === "Benfica1904&") {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('admin-section').classList.remove('hidden');
+                carregarLista();
+            } else { alert("Acesso Negado!"); }
+        }
+
+        async function processarEUpload() {
+            const btn = document.getElementById('btn-upload');
+            const file = document.getElementById('foto').files[0];
+            const nome = document.getElementById('nome').value;
+            const maquina = document.getElementById('maquina').value;
+            const gramas = parseFloat(document.getElementById('gramas').value);
+            const tempoMinutos = parseInt(document.getElementById('tempo').value);
+            const permiteCor = document.getElementById('permite_cor').checked;
+
+            if(!file || !nome || isNaN(gramas) || isNaN(tempoMinutos)) return alert("Preenche todos os campos!");
+
+            btn.innerText = "Processando...";
+            btn.disabled = true;
+
+            try {
+                // 1. REMOVER FUNDO
+                const formData = new FormData();
+                formData.append("image_file", file);
+                formData.append("size", "auto");
+                const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+                    method: "POST",
+                    headers: { "X-Api-Key": REMOVE_BG_KEY },
+                    body: formData
+                });
+                const blobSemFundo = await response.blob();
+
+                // 2. CANVAS/FUNDO CINZA
+                const img = await createImageBitmap(blobSemFundo);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 1000; canvas.height = 1000;
+                ctx.fillStyle = "#f3f3f3";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const ratio = Math.min(800 / img.width, 800 / img.height);
+                const nw = img.width * ratio; const nh = img.height * ratio;
+                ctx.drawImage(img, (1000 - nw) / 2, (1000 - nh) / 2, nw, nh);
+
+                canvas.toBlob(async (finalBlob) => {
+                    const fileName = `peca_${Date.now()}.jpg`;
+                    await _supabase.storage.from('fotos_pecas').upload(fileName, finalBlob);
+                    const imgUrl = `${SB_URL}/storage/v1/object/public/fotos_pecas/${fileName}`;
+
+                    // --- CÁLCULO EXATO IGUAL AO EXCEL SMART3D ---
+                    const tempoHoras = tempoMinutos / 60;
+
+                    // A) Custo do Filamento (Sem IVA: 14.2276€ por KG)
+                    const custoFilamento = gramas * 0.0142276; 
+
+                    // B) Custos da Máquina (Amortização + Energia)
+                    let custoHoraMaquina;
+                    let custoEnergiaHora;
+
+                    if (maquina === "H2S") {
+                        custoHoraMaquina = 0.21;  // Valor do Excel para P1S/H2S
+                        custoEnergiaHora = 0.03;  // 150W * 0.20€/kWh
+                    } else {
+                        custoHoraMaquina = 0.20;  // Valor do Excel para A1
+                        custoEnergiaHora = 0.024; // 120W * 0.20€/kWh
+                    }
+
+                    // C) Somatório e Taxas
+                    const custoImpressao = custoFilamento + (tempoHoras * (custoHoraMaquina + custoEnergiaHora));
+                    const assinaturas = 0.375; 
+                    const subTotal = custoImpressao + assinaturas;
+
+                    // D) Margem de Falhas (5%) e Lucro (100%)
+                    const custoFinalComFalhas = subTotal * 1.05;
+                    const precoVendaFinal = custoFinalComFalhas * 2;
+
+                    await _supabase.from('pecas_portfolio').insert({
+                        nome_peca: nome, 
+                        gramas_usadas: gramas, 
+                        tempo_impressao: tempoMinutos,
+                        preco_sugerido: precoVendaFinal.toFixed(2), 
+                        foto_url: imgUrl, 
+                        permite_cor: permiteCor
+                    });
+
+                    alert(`🎉 Sucesso! Preço calculado: ${precoVendaFinal.toFixed(2)}€`);
+                    location.reload();
+                }, 'image/jpeg', 0.9);
+
+            } catch (e) { 
+                alert("Erro: " + e.message); 
+                btn.disabled = false; 
+                btn.innerText = "Tentar novamente";
+            }
+        }
+
+        async function carregarLista() {
+            const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
+            document.getElementById('lista-pecas').innerHTML = data.map(p => `
+                <div class="item-admin">
+                    <span>${p.nome_peca} (${p.preco_sugerido}€)</span>
+                    <button class="btn-delete" onclick="apagarPeca('${p.id}')">Apagar</button>
+                </div>
+            `).join('');
+        }
+
+        async function apagarPeca(id) {
+            if(confirm("Desejas apagar esta peça?")) {
+                await _supabase.from('pecas_portfolio').delete().eq('id', id);
+                carregarLista();
+            }
+        }
+    </script>
+</body>
+</html>
