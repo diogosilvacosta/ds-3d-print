@@ -124,6 +124,22 @@
         <button id="btn-cancel" class="hidden" onclick="location.reload()" style="background:#333;">CANCELAR EDIÇÃO</button>
 
         <div class="item-list" style="margin-top:40px; border-top:1px solid #333;">
+            <h3>🎯 Banner de Promoção</h3>
+            <div style="background:#0a0a0a; border:1px solid #333; border-radius:8px; padding:15px; margin-bottom:20px;">
+                <div class="switch-container" style="margin:0 0 12px;">
+                    <span style="font-size:0.85rem; font-weight:bold;">Banner ativo no site?</span>
+                    <label class="switch">
+                        <input type="checkbox" id="banner-ativo" onchange="guardarBanner()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <label>Texto do banner:</label>
+                <input type="text" id="banner-texto" placeholder="Ex: 🎉 10% desconto este fim de semana!" oninput="guardarBanner()">
+                <small id="banner-status" style="color:#888; font-size:0.7rem; display:block; margin-top:5px;"></small>
+            </div>
+        </div>
+
+        <div class="item-list" style="margin-top:20px; border-top:1px solid #333;">
             <h3>Gestão do Catálogo</h3>
             <div id="lista-pecas">Carregando...</div>
         </div>
@@ -147,6 +163,7 @@
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('admin-section').classList.remove('hidden');
                 carregarLista();
+                carregarBannerAdmin();
             }
         };
 
@@ -244,6 +261,27 @@
                 
                 location.reload();
             } catch (e) { alert("Erro ao guardar dados."); btn.disabled = false; }
+        }
+
+        async function carregarBannerAdmin() {
+            const { data } = await _supabase.from('config_site').select('*').eq('chave', 'banner').single();
+            if (data) {
+                document.getElementById('banner-ativo').checked = data.ativo;
+                document.getElementById('banner-texto').value = data.valor || '';
+            }
+        }
+
+        let bannerTimer;
+        async function guardarBanner() {
+            clearTimeout(bannerTimer);
+            bannerTimer = setTimeout(async () => {
+                const ativo = document.getElementById('banner-ativo').checked;
+                const texto = document.getElementById('banner-texto').value;
+                const status = document.getElementById('banner-status');
+                const { error } = await _supabase.from('config_site').upsert({ chave: 'banner', ativo, valor: texto }, { onConflict: 'chave' });
+                status.innerText = error ? '❌ Erro ao guardar' : '✅ Guardado!';
+                setTimeout(() => status.innerText = '', 2000);
+            }, 800);
         }
 
         async function carregarLista() {
