@@ -290,77 +290,60 @@
             carregarLista();
         }
 
-        async function gerarPostInstagram(artigo) {
-            const btn = document.querySelector(`button[onclick*="toggleDestaque('${artigo.id}'"]`);
-            
-            // Mostrar modal de loading
+        function gerarPostInstagram(artigo) {
+            const nome = artigo.nome_peca;
+            const preco = artigo.preco_sugerido;
+            const cat = artigo.categoria || 'Geral';
+
+            const emojis = {
+                'Porta-chaves': '🔑', 'Decoração': '🏺', 'Brinquedos': '🎮',
+                'Geral': '🖨️'
+            };
+            const emoji = emojis[cat] || '🖨️';
+
+            const frases = [
+                `Novidade em destaque na DS 3D PRINT! ${emoji}`,
+                `Já conheces o nosso novo artigo? ${emoji}`,
+                `Acabou de entrar em destaque! ${emoji}`
+            ];
+            const frase = frases[Math.floor(Math.random() * frases.length)];
+
+            const textoPost =
+`${frase}
+
+✨ ${nome}
+💰 Apenas ${preco}€
+
+Feito com precisão e qualidade na nossa impressora 3D! Cada peça é criada com os melhores materiais para garantir durabilidade e um acabamento perfeito. 🔴⚙️
+
+👉 Encomenda já via WhatsApp ou DM!
+📲 Contacto: +351 911 780 404
+
+🌐 Visita o nosso site: ds-3d-print.vercel.app
+
+—
+🖨️ DS 3D PRINT | Você pensa, nós fazemos.
+
+#DS3DPrint #Impressão3D #3DPrint #Portugal #Personalizado #FeitoEmPortugal #${nome.replace(/\s+/g, '')} #Impressora3D #3DPrinting #CustomMade #MadeInPortugal #DesignPersonalizado #ImpressaoPersonalizada #3DPrintPortugal #Tecnologia #PecasPersonalizadas #Encomendas #HandMade #PrintingLovers #3DPrintingCommunity`;
+
             const modal = document.createElement('div');
             modal.id = 'modal-ig';
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
             modal.innerHTML = `
-                <div style="background:#161616;border:1px solid #333;border-radius:16px;padding:30px;max-width:420px;width:90%;text-align:center;">
-                    <div style="font-size:2rem;margin-bottom:15px;">✨</div>
-                    <h3 style="color:var(--red);margin:0 0 10px;text-transform:uppercase;">A gerar post com IA...</h3>
-                    <p style="color:#888;font-size:0.85rem;margin:0;">Um momento, a criar a legenda perfeita para o Instagram!</p>
+                <div style="background:#161616;border:1px solid #333;border-radius:16px;padding:25px;max-width:440px;width:100%;">
+                    <h3 style="color:var(--red);margin:0 0 15px;text-transform:uppercase;text-align:center;">📸 Post Gerado!</h3>
+                    <textarea id="texto-post" style="width:100%;height:220px;background:#0a0a0a;color:#fff;border:1px solid #333;border-radius:8px;padding:12px;font-size:0.78rem;line-height:1.6;resize:none;box-sizing:border-box;">${textoPost}</textarea>
+                    <div style="display:flex;gap:10px;margin-top:12px;">
+                        <button onclick="copiarEAbrirIG()" style="flex:1;padding:12px;background:var(--red);color:#fff;border:none;border-radius:8px;font-weight:900;cursor:pointer;font-size:0.78rem;text-transform:uppercase;">
+                            📋 Copiar e Abrir Instagram
+                        </button>
+                        <button onclick="document.getElementById('modal-ig').remove()" style="padding:12px 16px;background:#222;color:#888;border:1px solid #333;border-radius:8px;cursor:pointer;font-size:0.8rem;">
+                            ✕
+                        </button>
+                    </div>
+                    <p style="color:#555;font-size:0.68rem;text-align:center;margin-top:8px;">Podes editar o texto antes de copiar</p>
                 </div>`;
             document.body.appendChild(modal);
-
-            try {
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514",
-                        max_tokens: 1000,
-                        messages: [{
-                            role: "user",
-                            content: `Cria um post para Instagram para uma loja de impressão 3D portuguesa chamada "DS 3D PRINT" com o slogan "Você pensa, nós fazemos".
-
-O artigo em destaque é:
-- Nome: ${artigo.nome_peca}
-- Preço: ${artigo.preco_sugerido}€
-- Categoria: ${artigo.categoria || 'Geral'}
-
-O post deve:
-- Ser em português de Portugal
-- Ter emojis relevantes
-- Ser entusiasta e apelativo
-- Mencionar o preço
-- Ter entre 5-8 linhas
-- Terminar com 15-20 hashtags relevantes em português e inglês sobre impressão 3D, personalização, Portugal
-- Mencionar o contacto via WhatsApp ou DM para encomendas
-
-Devolve APENAS o texto do post, sem explicações.`
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                const textoPost = data.content[0].text;
-
-                // Atualizar modal com o resultado
-                modal.innerHTML = `
-                    <div style="background:#161616;border:1px solid #333;border-radius:16px;padding:30px;max-width:420px;width:90%;">
-                        <h3 style="color:var(--red);margin:0 0 15px;text-transform:uppercase;text-align:center;">📸 Post Gerado!</h3>
-                        <textarea id="texto-post" style="width:100%;height:200px;background:#0a0a0a;color:#fff;border:1px solid #333;border-radius:8px;padding:12px;font-size:0.8rem;line-height:1.5;resize:none;box-sizing:border-box;">${textoPost}</textarea>
-                        <div style="display:flex;gap:10px;margin-top:15px;">
-                            <button onclick="copiarEAbrirIG()" style="flex:1;padding:12px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366);color:#fff;border:none;border-radius:8px;font-weight:900;cursor:pointer;font-size:0.8rem;text-transform:uppercase;">
-                                📋 Copiar e Abrir Instagram
-                            </button>
-                            <button onclick="document.getElementById('modal-ig').remove()" style="padding:12px 18px;background:#222;color:#888;border:1px solid #333;border-radius:8px;cursor:pointer;font-size:0.8rem;">
-                                Fechar
-                            </button>
-                        </div>
-                        <p style="color:#555;font-size:0.7rem;text-align:center;margin-top:10px;">Podes editar o texto antes de copiar</p>
-                    </div>`;
-
-            } catch(e) {
-                modal.innerHTML = `
-                    <div style="background:#161616;border:1px solid #333;border-radius:16px;padding:30px;max-width:380px;width:90%;text-align:center;">
-                        <p style="color:var(--red);">Erro ao gerar post. Tenta novamente.</p>
-                        <button onclick="document.getElementById('modal-ig').remove()" style="padding:10px 20px;background:#333;color:#fff;border:none;border-radius:8px;cursor:pointer;">Fechar</button>
-                    </div>`;
-            }
         }
 
         function copiarEAbrirIG() {
