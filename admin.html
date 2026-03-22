@@ -78,7 +78,7 @@
         <input type="hidden" id="edit-id">
         
         <label>Nome:</label>
-        <input type="text" id="nome" placeholder="Ex: Vaso Geométrico">
+        <input type="text" id="nome" placeholder="Ex: Vaso Geométrico" oninput="sugerirCategoria()">
 
         <div class="calc-box">
             <label style="color:var(--red); margin-bottom: 5px;">Calculadora de Engenharia:</label>
@@ -98,12 +98,9 @@
         <label>Preço Final (€):</label>
         <input type="number" id="preco_manual" step="0.01" placeholder="0.00">
 
-        <label>Categoria:</label>
+        <label>Categoria: <span id="cat-sugestao" style="color:#ffd700; font-size:0.65rem; margin-left:6px;"></span></label>
         <select id="categoria">
             <option value="Geral">Geral</option>
-            <option value="Porta-chaves">Porta-chaves</option>
-            <option value="Decoração">Decoração</option>
-            <option value="Brinquedos">Brinquedos</option>
         </select>
 
         <div class="switch-container">
@@ -263,6 +260,96 @@
             } catch (e) { alert("Erro ao guardar dados."); btn.disabled = false; }
         }
 
+        // ---- CATEGORIAS AUTOMÁTICAS ----
+        let todasAsPecasAdmin = [];
+
+        function extrairPalavrasChave(nome) {
+            // Remove números, símbolos e palavras curtas — fica com palavras com 4+ letras
+            return nome.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+                .replace(/[^a-z\s]/g, '')
+                .split(/\s+/)
+                .filter(p => p.length >= 4);
+        }
+
+        function detetarCategoria(nomeNovo) {
+            const palavrasNovo = extrairPalavrasChave(nomeNovo);
+            if (palavrasNovo.length === 0) return null;
+
+            // Conta quantos artigos existentes partilham palavras-chave
+            const contagem = {};
+            for (const peca of todasAsPecasAdmin) {
+                if (peca.categoria && peca.categoria !== 'Geral') {
+                    const palavrasExist = extrairPalavrasChave(peca.nome_peca);
+                    const comum = palavrasNovo.filter(p => palavrasExist.includes(p));
+                    if (comum.length > 0) {
+                        contagem[peca.categoria] = (contagem[peca.categoria] || 0) + comum.length;
+                    }
+                }
+            }
+
+            // Se encontrou categoria com match, devolve a melhor
+            if (Object.keys(contagem).length > 0) {
+                return Object.entries(contagem).sort((a,b) => b[1]-a[1])[0][0];
+            }
+
+            // Tenta detetar nova categoria por palavras repetidas nos nomes dos artigos
+            const frequencia = {};
+            for (const peca of todasAsPecasAdmin) {
+                const palavras = extrairPalavrasChave(peca.nome_peca);
+                for (const p of palavras) {
+                    if (palavrasNovo.includes(p)) {
+                        frequencia[p] = (frequencia[p] || 0) + 1;
+                    }
+                }
+            }
+
+            // Se alguma palavra aparece em 2+ artigos, cria categoria nova
+            const candidatos = Object.entries(frequencia).filter(([,v]) => v >= 1).sort((a,b) => b[1]-a[1]);
+            if (candidatos.length > 0) {
+                // Capitaliza a palavra para usar como categoria
+                const palavra = candidatos[0][0];
+                return palavra.charAt(0).toUpperCase() + palavra.slice(1) + (palavra.endsWith('s') ? '' : 's');
+            }
+
+            return null;
+        }
+
+        function atualizarSelectCategorias() {
+            const cats = [...new Set(todasAsPecasAdmin.map(p => p.categoria).filter(c => c && c !== 'Geral'))].sort();
+            const select = document.getElementById('categoria');
+            const valorAtual = select.value;
+            select.innerHTML = '<option value="Geral">Geral</option>';
+            cats.forEach(c => {
+                select.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+            // Restaura valor se ainda existir
+            if (valorAtual) select.value = valorAtual;
+        }
+
+        function sugerirCategoria() {
+            const nome = document.getElementById('nome').value.trim();
+            if (nome.length < 4) { document.getElementById('cat-sugestao').innerText = ''; return; }
+
+            const sugestao = detetarCategoria(nome);
+            const select = document.getElementById('categoria');
+            const label = document.getElementById('cat-sugestao');
+
+            if (sugestao) {
+                // Verifica se já existe no select
+                const existe = [...select.options].some(o => o.value === sugestao);
+                if (!existe) {
+                    select.innerHTML += `<option value="${sugestao}">${sugestao} ✨ nova</option>`;
+                }
+                select.value = sugestao;
+                label.innerText = `✨ Auto: ${sugestao}`;
+            } else {
+                label.innerText = '';
+            }
+        }
+
+        // ---- FIM CATEGORIAS AUTOMÁTICAS ----
+
         async function carregarBannerAdmin() {
             const { data } = await _supabase.from('config_site').select('*').eq('chave', 'banner').single();
             if (data) {
@@ -286,6 +373,8 @@
 
         async function carregarLista() {
             const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
+            todasAsPecasAdmin = data;
+            atualizarSelectCategorias();
             document.getElementById('lista-pecas').innerHTML = data.map(p => {
                 const img = p.foto_url.split(',')[0];
                 return `
