@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS 3D PRINT | Engenharia & Design</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: #141414;
+            --text: #ffffff;
+            --accent: #ff4d4d;
+            --accent-hover: #cc0000;
+            --gray: #888;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+
+        /* HERO */
+        .hero {
+            height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+                        url('https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/fundo.png');
+            background-size: cover; background-position: center; background-attachment: fixed; padding: 20px;
+        }
+        .logo-hero { max-height: 100px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--accent)); }
+        h1 { font-size: clamp(2rem, 8vw, 3.5rem); margin: 0; font-weight: 900; letter-spacing: -1px; }
+        .slogan { color: var(--accent); font-size: 1rem; letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; opacity: 0.8; }
+
+        /* FILTROS */
+        section { padding: 40px 15px; max-width: 1200px; margin: 0 auto; }
+        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+        .filter-btn { 
+            background: #111; color: white; border: 1px solid #333; padding: 10px 22px; 
+            border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+        }
+        .filter-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+
+        /* GRID */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+
+        /* CARROSSEL */
+        .carousel { position: relative; width: 100%; aspect-ratio: 1; background: #fff; }
+        .carousel-track {
+            display: flex; width: 100%; height: 100%; overflow-x: auto;
+            scroll-snap-type: x mandatory; scrollbar-width: none;
+        }
+        .carousel-track::-webkit-scrollbar { display: none; }
+        .carousel-track img { min-width: 100%; max-width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; background: #fff; }
+
+        .dots {
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 6px; z-index: 5; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 20px;
+        }
+        .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: var(--accent); width: 15px; border-radius: 4px; }
+
+        /* INFO ARTIGO */
+        .card-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-nome { font-size: 1rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; }
+        .preco { font-size: 1.6rem; color: var(--accent); font-weight: 900; margin-bottom: 15px; }
+        .order-row { display: flex; gap: 10px; align-items: center; }
+        .qty { width: 60px; background: #000; border: 1px solid #333; color: white; padding: 12px 5px; text-align: center; border-radius: 6px; font-weight: bold; }
+        .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 6px; font-size: 0.8rem; transition: 0.3s; }
+
+        /* SECÇÃO MAKERWORLD */
+        .maker-section {
+            margin-top: 60px;
+            background: linear-gradient(145deg, #111, #080808);
+            border: 2px dashed #333;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .maker-section:hover { border-color: var(--accent); }
+        .maker-title { color: var(--accent); font-weight: 900; text-transform: uppercase; margin-bottom: 15px; font-size: 1.5rem; }
+        .maker-text { color: var(--gray); margin-bottom: 30px; font-size: 1rem; line-height: 1.5; }
+        .maker-btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn-maker { background: #fff; color: #000; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
+        .btn-maker-wa { background: #25D366; color: #fff; border: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; cursor: pointer; }
+
+        footer { text-align: center; padding: 50px; border-top: 1px solid #111; color: #444; font-size: 0.8rem; letter-spacing: 2px; }
+
+        /* BARRA CATÁLOGO */
+        .catalogo-bar { display: flex; justify-content: center; padding: 10px 15px; background: var(--accent); }
+        .catalogo-bar a { display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; transition: 0.2s; }
+        .catalogo-bar a:hover { opacity: 0.85; }
+
+        /* BARRA DE CONTACTOS */
+        .contact-bar { display: flex; justify-content: center; gap: 12px; padding: 12px 15px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; flex-wrap: wrap; }
+        .contact-bar a { display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border: 1px solid var(--accent); }
+        .btn-wa   { background: var(--accent); color: #fff; }
+        .btn-wa:hover   { background: var(--accent-hover); transform: translateY(-2px); }
+        .btn-call { background: transparent; color: #fff; }
+        .btn-call:hover { background: var(--accent); transform: translateY(-2px); }
+        .btn-ig   { background: transparent; color: #fff; }
+        .btn-ig:hover   { background: var(--accent); transform: translateY(-2px); }
+
+        /* DESTAQUE */
+        .destaque-section { padding: 30px 15px 0; max-width: 1200px; margin: 0 auto; }
+        .destaque-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .destaque-header h2 { margin: 0; font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; color: #fff; }
+        .destaque-badge-label { background: #ffd700; color: #000; font-size: 0.65rem; font-weight: 900; padding: 3px 10px; border-radius: 4px; letter-spacing: 2px; animation: pulse-badge 2s infinite; }
+        @keyframes pulse-badge { 0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,0.5)} 50%{box-shadow:0 0 12px 4px rgba(255,215,0,0.3)} }
+        .destaque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card-destaque { background: var(--card-bg); border: 2px solid #ffd700; border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+        .card-destaque:hover { transform: translateY(-5px); box-shadow: 0 0 35px rgba(255,215,0,0.3); }
+        .card-destaque .destaque-ribbon { position: absolute; top: 12px; left: 12px; background: #ffd700; color: #000; font-size: 0.6rem; font-weight: 900; padding: 3px 10px; border-radius: 4px; z-index: 10; letter-spacing: 1px; }
+        .divider-destaque { border: none; border-top: 1px solid #222; max-width: 1200px; margin: 30px auto 0; }
+    </style>
+</head>
+<body>
+
+    <div class="catalogo-bar">
+        <a href="https://ds-3d-print.vercel.app/catalogo.html" target="_blank">
+            <i class="fas fa-book-open"></i> Ver Catálogo Completo
+        </a>
+    </div>
+
+    <div class="contact-bar">
+        <a href="https://wa.me/351911780404?text=Olá! Gostava de saber mais sobre os vossos produtos 😊" class="btn-wa" target="_blank">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>
+        <a href="tel:+351911780404" class="btn-call">
+            <i class="fas fa-phone"></i> Ligar
+        </a>
+        <a href="https://www.instagram.com/ds_3dprint?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" class="btn-ig" target="_blank">
+            <i class="fab fa-instagram"></i> Instagram
+        </a>
+    </div>
+
+    <div class="hero">
+        <img src="https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/logo.png" class="logo-hero">
+        <h1>DS 3D PRINT</h1>
+        <div class="slogan">Você pensa, nós fazemos</div>
+    </div>
+
+    <section id="portfolio">
+        <!-- SECÇÃO DESTAQUE -->
+        <div class="destaque-section" id="destaque-section" style="display:none;">
+            <div class="destaque-header">
+                <h2>⭐ Em Destaque</h2>
+                <span class="destaque-badge-label">NOVIDADE</span>
+            </div>
+            <div class="destaque-grid" id="destaque-grid"></div>
+            <hr class="divider-destaque">
+        </div>
+
+        <div class="filters" id="category-filters"></div>
+        
+        <div class="grid" id="portfolio-grid">
+            <p style="text-align: center; grid-column: 1/-1;">Sincronizando catálogo...</p>
+        </div>
+
+        <div class="maker-section">
+            <h2 class="maker-title">Procuras algo diferente?</h2>
+            <p class="maker-text">Explora milhões de modelos 3D no <b>MakerWorld</b>.<br>Escolhe o teu projeto favorito, envia-nos o link e nós imprimimos para ti!</p>
+            <div class="maker-btns">
+                <a href="https://makerworld.com/" target="_blank" class="btn-maker">
+                    <i class="fas fa-external-link-alt"></i> Abrir MakerWorld
+                </a>
+                <button onclick="enviarLinkMaker()" class="btn-maker-wa">
+                    <i class="fab fa-whatsapp"></i> Pedir Orçamento via Link
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 DS 3D PRINT | ENGENHARIA EM MOVIMENTO</p>
+    </footer>
+
+    <script>
+        const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        let todasAsPecas = [];
+
+        async function carregar() {
+            const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
+            todasAsPecas = data;
+            
+            // --- DESTAQUES ---
+            const emDestaque = data.filter(p => p.destaque);
+            const destaqueSection = document.getElementById('destaque-section');
+            const destaqueGrid = document.getElementById('destaque-grid');
+            if (emDestaque.length > 0) {
+                destaqueSection.style.display = 'block';
+                destaqueGrid.innerHTML = emDestaque.map(p => {
+                    const fotos = p.foto_url.split(',');
+                    return `
+                        <div class="card card-destaque">
+                            <div class="destaque-ribbon">⭐ DESTAQUE</div>
+                            <div class="carousel">
+                                <div class="carousel-track" onscroll="updateDots(this, 'dest-${p.id}')">
+                                    ${fotos.map(url => `<img src="${url.trim()}" loading="lazy">`).join('')}
+                                </div>
+                                ${fotos.length > 1 ? `<div class="dots" id="dots-dest-${p.id}">${fotos.map((_,i) => `<div class="dot ${i===0?'active':''}"></div>`).join('')}</div>` : ''}
+                            </div>
+                            <div class="card-info">
+                                <div>
+                                    <div class="card-nome">${p.nome_peca}</div>
+                                    <div class="preco">${p.preco_sugerido}€</div>
+                                </div>
+                                <div class="order-row">
+                                    <input type="number" id="qtd-dest-${p.id}" value="1" min="1" class="qty">
+                                    <button onclick="encomendar('${p.nome_peca.replace(/'/g, "\\'")}', 'dest-${p.id}', ${p.preco_sugerido})" class="btn-order">Encomendar</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            const cats = [...new Set(data.map(p => p.categoria).filter(c => c && c !== 'Geral'))];
+            const filterDiv = document.getElementById('category-filters');
+            filterDiv.innerHTML = `<button class="filter-btn active" onclick="filtrar('Todas', this)">Todas</button><button class="filter-btn" onclick="filtrar('Geral', this)">Geral</button>`;
+            cats.forEach(c => filterDiv.innerHTML += `<button class="filter-btn" onclick="filtrar('${c}', this)">${c}</button>`);
+
+            renderizar(data);
+        }
+
+        function renderizar(lista) {
+            const grid = document.getElementById('portfolio-grid');
+            grid.innerHTML = lista.map(p => {
+                const fotos = p.foto_url.split(',');
+                return `
+                    <div class="card">
+                        <div class="carousel">
+                            <div class="carousel-track" onscroll="updateDots(this, '${p.id}')">
+                                ${fotos.map(url => `<img src="${url.trim()}" loading="lazy">`).join('')}
+                            </div>
+                            ${fotos.length > 1 ? `
+                                <div class="dots" id="dots-${p.id}">
+                                    ${fotos.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="card-info">
+                            <div>
+                                <div class="card-nome">${p.nome_peca}</div>
+                                <div class="preco">${p.preco_sugerido}€</div>
+                            </div>
+                            <div class="order-row">
+                                <input type="number" id="qtd-${p.id}" value="1" min="1" class="qty">
+                                <button onclick="encomendar('${p.nome_peca.replace(/'/g, "\\'")}', '${p.id}', ${p.preco_sugerido})" class="btn-order">Encomendar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateDots(track, id) {
+            const dotsContainer = document.getElementById(`dots-${id}`);
+            if (!dotsContainer) return;
+            const index = Math.round(track.scrollLeft / track.offsetWidth);
+            const dots = dotsContainer.querySelectorAll('.dot');
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+        }
+
+        function filtrar(c, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderizar(c === 'Todas' ? todasAsPecas : todasAsPecas.filter(p => p.categoria === c));
+        }
+
+        function encomendar(nome, id, preco) {
+            const qtd = document.getElementById(`qtd-${id}`).value;
+            const total = (qtd * preco).toFixed(2);
+            window.open(`https://wa.me/351911780404?text=Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${total}€`, '_blank');
+        }
+
+        function enviarLinkMaker() {
+            const msg = `Olá Diogo! Encontrei um modelo no MakerWorld e gostava de saber o orçamento para impressão:\n\n🔗 *Link:* (Cola aqui o link do modelo)`;
+            window.open(`https://wa.me/351911780404?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        carregar();
+    </script>
+</body>
+</html>
