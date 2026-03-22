@@ -263,56 +263,20 @@
         // ---- CATEGORIAS AUTOMÁTICAS ----
         let todasAsPecasAdmin = [];
 
-        function extrairPalavrasChave(nome) {
-            // Remove números, símbolos e palavras curtas — fica com palavras com 4+ letras
-            return nome.toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+        // Palavras a ignorar na deteção de categoria
+        const STOP_WORDS = ['para','com','sem','por','dos','das','uns','umas','num','uma','uns','tipo','mini','maxi','pro','plus','lite','mega'];
+
+        function normalizarTexto(txt) {
+            return txt.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^a-z\s]/g, '')
-                .split(/\s+/)
-                .filter(p => p.length >= 4);
+                .trim();
         }
 
-        function detetarCategoria(nomeNovo) {
-            const palavrasNovo = extrairPalavrasChave(nomeNovo);
-            if (palavrasNovo.length === 0) return null;
-
-            // Conta quantos artigos existentes partilham palavras-chave
-            const contagem = {};
-            for (const peca of todasAsPecasAdmin) {
-                if (peca.categoria && peca.categoria !== 'Geral') {
-                    const palavrasExist = extrairPalavrasChave(peca.nome_peca);
-                    const comum = palavrasNovo.filter(p => palavrasExist.includes(p));
-                    if (comum.length > 0) {
-                        contagem[peca.categoria] = (contagem[peca.categoria] || 0) + comum.length;
-                    }
-                }
-            }
-
-            // Se encontrou categoria com match, devolve a melhor
-            if (Object.keys(contagem).length > 0) {
-                return Object.entries(contagem).sort((a,b) => b[1]-a[1])[0][0];
-            }
-
-            // Tenta detetar nova categoria por palavras repetidas nos nomes dos artigos
-            const frequencia = {};
-            for (const peca of todasAsPecasAdmin) {
-                const palavras = extrairPalavrasChave(peca.nome_peca);
-                for (const p of palavras) {
-                    if (palavrasNovo.includes(p)) {
-                        frequencia[p] = (frequencia[p] || 0) + 1;
-                    }
-                }
-            }
-
-            // Se alguma palavra aparece em 2+ artigos, cria categoria nova
-            const candidatos = Object.entries(frequencia).filter(([,v]) => v >= 1).sort((a,b) => b[1]-a[1]);
-            if (candidatos.length > 0) {
-                // Capitaliza a palavra para usar como categoria
-                const palavra = candidatos[0][0];
-                return palavra.charAt(0).toUpperCase() + palavra.slice(1) + (palavra.endsWith('s') ? '' : 's');
-            }
-
-            return null;
+        function palavrasSignificativas(nome) {
+            return normalizarTexto(nome)
+                .split(/\s+/)
+                .filter(p => p.length >= 4 && !STOP_WORDS.includes(p));
         }
 
         function atualizarSelectCategorias() {
@@ -320,32 +284,59 @@
             const select = document.getElementById('categoria');
             const valorAtual = select.value;
             select.innerHTML = '<option value="Geral">Geral</option>';
-            cats.forEach(c => {
-                select.innerHTML += `<option value="${c}">${c}</option>`;
-            });
-            // Restaura valor se ainda existir
-            if (valorAtual) select.value = valorAtual;
+            cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+            if ([...select.options].some(o => o.value === valorAtual)) select.value = valorAtual;
         }
 
         function sugerirCategoria() {
             const nome = document.getElementById('nome').value.trim();
-            if (nome.length < 4) { document.getElementById('cat-sugestao').innerText = ''; return; }
-
-            const sugestao = detetarCategoria(nome);
-            const select = document.getElementById('categoria');
             const label = document.getElementById('cat-sugestao');
+            const select = document.getElementById('categoria');
+            if (nome.length < 3) { label.innerText = ''; return; }
 
-            if (sugestao) {
-                // Verifica se já existe no select
-                const existe = [...select.options].some(o => o.value === sugestao);
-                if (!existe) {
-                    select.innerHTML += `<option value="${sugestao}">${sugestao} ✨ nova</option>`;
+            const palavrasNovo = palavrasSignificativas(nome);
+            if (palavrasNovo.length === 0) { label.innerText = ''; return; }
+
+            // 1. Procura artigos existentes com pelo menos 1 palavra em comum
+            const pontuacao = {};
+            for (const peca of todasAsPecasAdmin) {
+                const palavrasPeca = palavrasSignificativas(peca.nome_peca);
+                const comuns = palavrasNovo.filter(p => palavrasPeca.some(pp => pp.startsWith(p.substring(0,4)) || p.startsWith(pp.substring(0,4))));
+                if (comuns.length > 0) {
+                    const cat = peca.categoria && peca.categoria !== 'Geral' ? peca.categoria : gerarCategoriaDoPNome(peca.nome_peca);
+                    if (cat) pontuacao[cat] = (pontuacao[cat] || 0) + comuns.length;
                 }
-                select.value = sugestao;
-                label.innerText = `✨ Auto: ${sugestao}`;
+            }
+
+            // 2. Se encontrou match, usa a categoria com mais pontos
+            if (Object.keys(pontuacao).length > 0) {
+                const melhor = Object.entries(pontuacao).sort((a,b) => b[1]-a[1])[0][0];
+                aplicarSugestao(melhor, select, label);
+                return;
+            }
+
+            // 3. Se não encontrou, gera categoria a partir da primeira palavra do nome atual
+            const catNova = gerarCategoriaDoPNome(nome);
+            if (catNova) {
+                aplicarSugestao(catNova, select, label);
             } else {
                 label.innerText = '';
             }
+        }
+
+        function gerarCategoriaDoPNome(nome) {
+            const palavras = palavrasSignificativas(nome);
+            if (palavras.length === 0) return null;
+            // Usa as primeiras 1-2 palavras como categoria, capitaliza
+            const base = palavras.slice(0, palavras[0].length > 6 ? 1 : 2).join(' ');
+            return base.charAt(0).toUpperCase() + base.slice(1);
+        }
+
+        function aplicarSugestao(cat, select, label) {
+            const existe = [...select.options].some(o => o.value === cat);
+            if (!existe) select.innerHTML += `<option value="${cat}">${cat} ✨</option>`;
+            select.value = cat;
+            label.innerText = `✨ Auto: ${cat}`;
         }
 
         // ---- FIM CATEGORIAS AUTOMÁTICAS ----
