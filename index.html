@@ -88,6 +88,13 @@
 
         footer { text-align: center; padding: 50px; border-top: 1px solid #111; color: #444; font-size: 0.8rem; letter-spacing: 2px; }
 
+        /* BANNER PROMOÇÃO */
+        .promo-banner { display: none; justify-content: center; align-items: center; gap: 12px; padding: 10px 20px; background: #ff4d4d; color: #fff; font-size: 0.8rem; font-weight: 700; text-align: center; flex-wrap: wrap; animation: slide-in 0.4s ease; }
+        @keyframes slide-in { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .promo-banner span { letter-spacing: 1px; }
+        .promo-close { background: rgba(0,0,0,0.2); border: none; color: #fff; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .promo-close:hover { background: rgba(0,0,0,0.4); }
+
         /* BARRA CATÁLOGO */
         .catalogo-bar { display: flex; justify-content: center; padding: 10px 15px; background: var(--accent); }
         .catalogo-bar a { display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; transition: 0.2s; }
@@ -117,6 +124,11 @@
     </style>
 </head>
 <body>
+
+    <div class="promo-banner" id="promo-banner">
+        <span id="promo-texto">🎉 Promoção especial — contacta-nos para saber mais!</span>
+        <button class="promo-close" onclick="fecharBanner()">✕</button>
+    </div>
 
     <div class="catalogo-bar">
         <a href="https://ds-3d-print.vercel.app/catalogo.html" target="_blank">
@@ -183,6 +195,19 @@
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
         let todasAsPecas = [];
+
+        async function carregarBanner() {
+            const { data } = await _supabase.from('config_site').select('*').eq('chave', 'banner').single();
+            if (data && data.ativo) {
+                const banner = document.getElementById('promo-banner');
+                document.getElementById('promo-texto').innerText = data.valor;
+                banner.style.display = 'flex';
+            }
+        }
+
+        function fecharBanner() {
+            document.getElementById('promo-banner').style.display = 'none';
+        }
 
         async function carregar() {
             const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
@@ -285,6 +310,7 @@
         }
 
         carregar();
+        carregarBanner();
     </script>
 </body>
 </html>
