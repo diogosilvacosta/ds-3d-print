@@ -88,6 +88,15 @@
 
         footer { text-align: center; padding: 50px; border-top: 1px solid #111; color: #444; font-size: 0.8rem; letter-spacing: 2px; }
 
+        /* BOTÃO WHATSAPP FLUTUANTE */
+        .wa-float { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .wa-btn { background: var(--accent); color: #fff; border: none; border-radius: 50px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 900; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(255,77,77,0.4); transition: 0.2s; cursor: pointer; }
+        .wa-btn:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 6px 25px rgba(255,77,77,0.5); }
+        .wa-btn i { font-size: 1.2rem; }
+        .wa-tooltip { background: #111; color: #fff; font-size: 0.7rem; padding: 6px 12px; border-radius: 6px; border: 1px solid #333; white-space: nowrap; animation: fade-in 0.3s ease; }
+        @keyframes fade-in { from { opacity:0; transform: translateY(5px); } to { opacity:1; transform: translateY(0); } }
+        @media (max-width: 480px) { .wa-btn span { display: none; } .wa-btn { padding: 16px; border-radius: 50%; } }
+
         /* BANNER PROMOÇÃO */
         .promo-banner { display: none; justify-content: center; align-items: center; gap: 12px; padding: 10px 20px; background: #ff4d4d; color: #fff; font-size: 0.8rem; font-weight: 700; text-align: center; flex-wrap: wrap; animation: slide-in 0.4s ease; }
         @keyframes slide-in { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -188,6 +197,15 @@
     <footer>
         <p>© 2026 DS 3D PRINT | ENGENHARIA EM MOVIMENTO</p>
     </footer>
+
+    <!-- BOTÃO WHATSAPP FLUTUANTE -->
+    <div class="wa-float" id="wa-float" style="display:none;">
+        <div class="wa-tooltip" id="wa-tooltip">💬 Fala connosco!</div>
+        <a href="https://wa.me/351911780404?text=Olá! Gostava de saber mais sobre os vossos produtos 😊" class="wa-btn" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+            <span>Encomendar agora</span>
+        </a>
+    </div>
 
     <script>
         const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
@@ -311,6 +329,16 @@
 
         carregar();
         carregarBanner();
+
+        // Botão flutuante WhatsApp — aparece após 3 segundos
+        setTimeout(() => {
+            document.getElementById('wa-float').style.display = 'flex';
+            // Esconde o tooltip após 4 segundos
+            setTimeout(() => {
+                const t = document.getElementById('wa-tooltip');
+                if(t) t.style.display = 'none';
+            }, 4000);
+        }, 3000);
     </script>
 </body>
 </html>
