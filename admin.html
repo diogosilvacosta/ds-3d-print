@@ -52,6 +52,21 @@
 </head>
 <body>
 
+    <!-- NAVEGAÇÃO TABS -->
+    <div style="max-width:500px; margin: 0 auto 20px; display:flex; gap:0;">
+        <button onclick="mostrarTab('admin')" id="tab-admin" style="flex:1; padding:12px; background:var(--red); color:#fff; border:none; border-radius:8px 0 0 8px; font-weight:900; font-size:0.8rem; text-transform:uppercase; cursor:pointer; letter-spacing:1px;">
+            ⚙️ Gestão
+        </button>
+        <button onclick="mostrarTab('ferramenta')" id="tab-ferramenta" style="flex:1; padding:12px; background:#222; color:#888; border:none; border-radius:0 8px 8px 0; font-weight:900; font-size:0.8rem; text-transform:uppercase; cursor:pointer; letter-spacing:1px;">
+            📊 Calculadora Pro
+        </button>
+    </div>
+
+    <!-- PAINEL FERRAMENTA -->
+    <div id="painel-ferramenta" style="display:none; max-width:500px; margin:0 auto;">
+        <iframe src="https://secret-sheet-pro.lovable.app/" style="width:100%; height:85vh; border:none; border-radius:12px; background:#111;"></iframe>
+    </div>
+
     <div id="login-section" class="admin-panel">
         <h2>DS 3D Admin 🔴</h2>
         <input type="text" id="user" placeholder="Utilizador">
@@ -120,6 +135,17 @@
     </div>
 
     <script>
+        function mostrarTab(tab) {
+            const isAdmin = tab === 'admin';
+            document.getElementById('painel-ferramenta').style.display = isAdmin ? 'none' : 'block';
+            document.getElementById('login-section').style.display = isAdmin ? '' : 'none';
+            document.getElementById('admin-section').style.display = (isAdmin && localStorage.getItem('ds_logged') === 'true') ? '' : (isAdmin ? '' : 'none');
+            document.getElementById('tab-admin').style.background = isAdmin ? 'var(--red)' : '#222';
+            document.getElementById('tab-admin').style.color = isAdmin ? '#fff' : '#888';
+            document.getElementById('tab-ferramenta').style.background = isAdmin ? '#222' : 'var(--red)';
+            document.getElementById('tab-ferramenta').style.color = isAdmin ? '#888' : '#fff';
+        }
+
         const SB_URL = "https://wxwdvixxcrduzneqjfwo.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM";
         const REMOVE_BG_KEY = "KYm3knsGAoS6YhcghA9gqmwL";
