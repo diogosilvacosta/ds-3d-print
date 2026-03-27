@@ -16,122 +16,118 @@
             --accent: #ff4d4d;
             --accent-hover: #cc0000;
             --gray: #888;
+            --gold: #ffd700;
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
 
         /* HERO */
         .hero {
-            height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
             background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
                         url('https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/fundo.png');
             background-size: cover; background-position: center; background-attachment: fixed; padding: 20px;
         }
-        .logo-hero { max-height: 100px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--accent)); }
-        h1 { font-size: clamp(2rem, 8vw, 3.5rem); margin: 0; font-weight: 900; letter-spacing: -1px; }
-        .slogan { color: var(--accent); font-size: 1rem; letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; opacity: 0.8; }
+        .logo-hero { max-height: 80px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--accent)); }
+        h1 { font-size: clamp(1.8rem, 6vw, 3rem); margin: 0; font-weight: 900; letter-spacing: -1px; }
+        .slogan { color: var(--accent); font-size: 0.8rem; letter-spacing: 4px; text-transform: uppercase; margin-top: 8px; opacity: 0.8; }
 
-        /* BARRA DE FERRAMENTAS (PESQUISA E ORDENAÇÃO) */
-        .tools-container { max-width: 1200px; margin: 40px auto 20px; padding: 0 15px; display: flex; gap: 15px; flex-wrap: wrap; }
-        
-        .search-wrapper { position: relative; flex: 1; min-width: 280px; display: flex; align-items: center; }
+        /* BARRA DE FERRAMENTAS */
+        .tools-container { max-width: 1200px; margin: 30px auto 10px; padding: 0 15px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .search-wrapper { position: relative; flex: 2; min-width: 250px; display: flex; align-items: center; }
         .search-input {
-            width: 100%; padding: 15px 20px 15px 45px; background: var(--card-bg); 
-            border: 1px solid #333; border-radius: 12px; color: white; font-size: 1rem; 
-            outline: none; transition: 0.3s;
+            width: 100%; padding: 12px 15px 12px 40px; background: var(--card-bg); 
+            border: 1px solid #222; border-radius: 10px; color: white; font-size: 0.9rem; outline: none; transition: 0.3s;
         }
-        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(255,77,77,0.1); }
-        .search-icon { position: absolute; left: 18px; color: var(--accent); }
+        .search-input:focus { border-color: var(--accent); }
+        .search-icon { position: absolute; left: 15px; color: var(--accent); font-size: 0.9rem; }
 
-        .sort-wrapper { min-width: 200px; }
+        .sort-wrapper { flex: 1; min-width: 180px; }
         .sort-select {
-            width: 100%; height: 100%; padding: 0 15px; background: var(--card-bg); 
-            border: 1px solid #333; border-radius: 12px; color: white; font-size: 0.9rem;
-            cursor: pointer; outline: none; transition: 0.3s; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff4d4d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 15px center; background-size: 15px;
+            width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid #222; 
+            border-radius: 10px; color: white; font-size: 0.85rem; cursor: pointer; outline: none;
+            appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff4d4d' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 10px center; background-size: 14px;
         }
-        .sort-select:focus { border-color: var(--accent); }
 
-        /* FILTROS DE CATEGORIA */
-        section { padding: 0 15px 40px; max-width: 1200px; margin: 0 auto; }
-        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
+        /* FILTROS CATEGORIA */
+        .filters { display: flex; justify-content: center; gap: 8px; margin: 20px auto 40px; flex-wrap: wrap; max-width: 1200px; padding: 0 15px; }
         .filter-btn { 
-            background: #111; color: white; border: 1px solid #333; padding: 10px 22px; 
-            border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+            background: #111; color: white; border: 1px solid #222; padding: 8px 16px; 
+            border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
         }
-        .filter-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+        .filter-btn.active { background: var(--accent); border-color: var(--accent); }
 
-        /* GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; min-height: 200px; }
-        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; }
-        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        /* SECCÃO DESTAQUES (MAIS PEQUENA) */
+        .destaque-section { padding: 20px 15px; max-width: 1200px; margin: 0 auto; background: rgba(255, 215, 0, 0.02); border-radius: 15px; }
+        .destaque-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .destaque-header h2 { margin: 0; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); }
+        .destaque-badge { background: var(--gold); color: #000; font-size: 0.6rem; font-weight: 900; padding: 2px 8px; border-radius: 4px; }
+        
+        .destaque-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 15px; 
+        }
+
+        /* GRID PRINCIPAL */
+        section { padding: 0 15px 40px; max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+        /* CARDS */
+        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; position: relative; }
+        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .card-destaque { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.05); }
 
         /* CARROSSEL */
         .carousel { position: relative; width: 100%; aspect-ratio: 1; background: #fff; }
         .carousel-track { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .carousel-track::-webkit-scrollbar { display: none; }
         .carousel-track img { min-width: 100%; max-width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; }
-        .dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 20px; }
-        .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
-        .dot.active { background: var(--accent); width: 15px; border-radius: 4px; }
+        
+        .dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 15px; }
+        .dot { width: 5px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: var(--accent); width: 12px; border-radius: 3px; }
 
         /* INFO ARTIGO */
-        .card-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .card-nome { font-size: 1rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; }
-        .preco { font-size: 1.6rem; color: var(--accent); font-weight: 900; margin-bottom: 15px; }
-        .order-row { display: flex; gap: 10px; align-items: center; }
-        .qty { width: 60px; background: #000; border: 1px solid #333; color: white; padding: 12px 5px; text-align: center; border-radius: 6px; font-weight: bold; }
-        .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 6px; font-size: 0.8rem; transition: 0.3s; }
+        .card-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-nome { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; }
+        .preco { font-size: 1.3rem; color: var(--accent); font-weight: 900; margin-bottom: 12px; }
+        
+        /* Ajustes menores para destaques */
+        .card-destaque .card-nome { font-size: 0.75rem; }
+        .card-destaque .preco { font-size: 1.1rem; }
 
-        /* MAKERWORLD */
-        .maker-section {
-            margin-top: 60px; background: linear-gradient(145deg, #111, #080808);
-            border: 2px dashed #333; border-radius: 15px; padding: 40px; text-align: center;
-        }
-        .maker-title { color: var(--accent); font-weight: 900; text-transform: uppercase; margin-bottom: 15px; font-size: 1.5rem; }
-        .maker-text { color: var(--gray); margin-bottom: 30px; font-size: 1rem; line-height: 1.5; }
-        .btn-maker { background: #fff; color: #000; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; display: inline-block; margin: 5px; }
-        .btn-maker-wa { background: #25D366; color: #fff; border: none; padding: 15px 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; cursor: pointer; margin: 5px; }
+        .order-row { display: flex; gap: 8px; align-items: center; }
+        .qty { width: 45px; background: #000; border: 1px solid #333; color: white; padding: 8px 2px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
+        .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 6px; font-size: 0.7rem; transition: 0.3s; }
 
-        /* RODAPÉ E FIXOS */
-        footer { text-align: center; padding: 50px; border-top: 1px solid #111; color: #444; font-size: 0.8rem; letter-spacing: 2px; }
-        .wa-float { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
-        .wa-btn { background: var(--accent); color: #fff; border-radius: 50px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 900; text-decoration: none; text-transform: uppercase; box-shadow: 0 4px 20px rgba(255,77,77,0.4); }
-        .promo-banner { display: none; justify-content: center; align-items: center; gap: 12px; padding: 10px 20px; background: #ff4d4d; color: #fff; font-size: 0.8rem; font-weight: 700; text-align: center; }
-        .catalogo-bar { display: flex; justify-content: center; padding: 10px 15px; background: var(--accent); }
-        .catalogo-bar a { color: #fff; text-decoration: none; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-        .contact-bar { display: flex; justify-content: center; gap: 12px; padding: 12px 15px; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; flex-wrap: wrap; }
-        .contact-bar a { padding: 9px 18px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-decoration: none; text-transform: uppercase; border: 1px solid var(--accent); color: white; }
+        .destaque-ribbon { position: absolute; top: 8px; left: 8px; background: var(--gold); color: #000; font-size: 0.55rem; font-weight: 900; padding: 2px 6px; border-radius: 3px; z-index: 10; }
 
-        /* DESTAQUE */
-        .destaque-section { padding: 30px 15px 0; max-width: 1200px; margin: 0 auto; }
-        .destaque-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .destaque-header h2 { margin: 0; font-size: 1.1rem; font-weight: 900; text-transform: uppercase; color: #fff; }
-        .destaque-badge-label { background: #ffd700; color: #000; font-size: 0.65rem; font-weight: 900; padding: 3px 10px; border-radius: 4px; }
-        .destaque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .card-destaque { border: 2px solid #ffd700; position: relative; }
-        .card-destaque .destaque-ribbon { position: absolute; top: 12px; left: 12px; background: #ffd700; color: #000; font-size: 0.6rem; font-weight: 900; padding: 3px 10px; border-radius: 4px; z-index: 10; }
+        /* OUTROS */
+        .maker-section { margin-top: 50px; background: #111; border: 1px dashed #333; border-radius: 15px; padding: 30px; text-align: center; }
+        .maker-title { color: var(--accent); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 10px; }
+        .maker-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 20px; }
+        
+        .contact-bar { display: flex; justify-content: center; gap: 10px; padding: 10px; background: #0f0f0f; flex-wrap: wrap; }
+        .contact-bar a { padding: 8px 15px; border-radius: 5px; font-size: 0.7rem; font-weight: 700; text-decoration: none; text-transform: uppercase; border: 1px solid var(--accent); color: white; }
+        
+        .wa-float { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
+        .wa-btn { background: var(--accent); color: white; padding: 12px 20px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255,77,77,0.3); }
 
-        @media (max-width: 600px) { .wa-btn span { display: none; } .wa-btn { padding: 16px; border-radius: 50%; } }
+        footer { text-align: center; padding: 40px; color: #333; font-size: 0.7rem; letter-spacing: 2px; border-top: 1px solid #111; }
+        
+        @media (max-width: 600px) { .wa-btn span { display: none; } .wa-btn { padding: 15px; border-radius: 50%; } }
     </style>
 </head>
 <body>
 
-    <div class="promo-banner" id="promo-banner">
-        <span id="promo-texto">🎉 Promoção especial — contacta-nos para saber mais!</span>
-        <button onclick="fecharBanner()" style="background:none; border:none; color:white; cursor:pointer; padding-left: 10px;">✕</button>
-    </div>
-
-    <div class="catalogo-bar">
-        <a href="https://ds-3d-print.vercel.app/catalogo.html" target="_blank">
-            <i class="fas fa-book-open"></i> Ver Catálogo Completo
-        </a>
+    <div class="promo-banner" id="promo-banner" style="display:none; background: var(--accent); text-align: center; padding: 8px; font-size: 0.8rem; font-weight: bold;">
+        <span id="promo-texto"></span>
     </div>
 
     <div class="contact-bar">
-        <a href="https://wa.me/351911780404?text=Olá! Gostava de saber mais sobre os vossos produtos 😊" style="background: var(--accent);" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-        <a href="tel:+351911780404"><i class="fas fa-phone"></i> Ligar</a>
+        <a href="https://wa.me/351911780404" style="background: var(--accent);" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
         <a href="https://www.instagram.com/ds_3dprint" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
     </div>
 
@@ -144,11 +140,11 @@
     <div class="tools-container">
         <div class="search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="search-input" class="search-input" placeholder="Pesquisar produto...">
+            <input type="text" id="search-input" class="search-input" placeholder="O que procuras?">
         </div>
         <div class="sort-wrapper">
             <select id="sort-select" class="sort-select">
-                <option value="recentes">Mais recentes</option>
+                <option value="recentes">Novidades</option>
                 <option value="crescente">Preço: Baixo para Alto</option>
                 <option value="decrescente">Preço: Alto para Baixo</option>
                 <option value="az">Nome: A - Z</option>
@@ -156,38 +152,32 @@
         </div>
     </div>
 
-    <section id="portfolio">
-        <div class="destaque-section" id="destaque-section" style="display:none;">
-            <div class="destaque-header">
-                <h2>⭐ Em Destaque</h2>
-                <span class="destaque-badge-label">NOVIDADE</span>
-            </div>
-            <div class="destaque-grid" id="destaque-grid"></div>
-            <hr style="border:none; border-top:1px solid #222; margin: 40px 0;">
-        </div>
+    <div class="filters" id="category-filters"></div>
 
-        <div class="filters" id="category-filters"></div>
-        
+    <div class="destaque-section" id="destaque-section" style="display:none;">
+        <div class="destaque-header">
+            <h2>⭐ Em Destaque</h2>
+            <span class="destaque-badge">TOP</span>
+        </div>
+        <div class="destaque-grid" id="destaque-grid"></div>
+    </div>
+
+    <section>
         <div class="grid" id="portfolio-grid">
-            <p style="text-align: center; grid-column: 1/-1;">Sincronizando catálogo...</p>
+            <p style="text-align: center; grid-column: 1/-1; color: #444;">A carregar catálogo...</p>
         </div>
 
         <div class="maker-section">
-            <h2 class="maker-title">Procuras algo diferente?</h2>
-            <p class="maker-text">Explora modelos 3D no <b>MakerWorld</b> e nós imprimimos!</p>
-            <div class="maker-btns">
-                <a href="https://makerworld.com/" target="_blank" class="btn-maker">Abrir MakerWorld</a>
-                <button onclick="enviarLinkMaker()" class="btn-maker-wa">Pedir Orçamento</button>
-            </div>
+            <h2 class="maker-title">Tens um link do MakerWorld?</h2>
+            <p class="maker-text">Nós imprimimos para ti com a máxima qualidade.</p>
+            <button onclick="enviarLinkMaker()" class="btn-order" style="max-width: 200px; margin: 0 auto; display: block;">Pedir Orçamento</button>
         </div>
     </section>
 
-    <footer>
-        <p>© 2026 DS 3D PRINT | ENGENHARIA EM MOVIMENTO</p>
-    </footer>
+    <footer>© 2026 DS 3D PRINT | ENGENHARIA EM MOVIMENTO</footer>
 
     <div class="wa-float" id="wa-float" style="display:none;">
-        <a href="https://wa.me/351911780404?text=Olá! 😊" class="wa-btn" target="_blank">
+        <a href="https://wa.me/351911780404" class="wa-btn" target="_blank">
             <i class="fab fa-whatsapp"></i> <span>Encomendar</span>
         </a>
     </div>
@@ -204,65 +194,53 @@
             const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
             todasAsPecas = data;
             
-            // Renderiza Destaques
+            // Destaques (Compactos)
             const emDestaque = data.filter(p => p.destaque);
             if (emDestaque.length > 0) {
                 document.getElementById('destaque-section').style.display = 'block';
                 document.getElementById('destaque-grid').innerHTML = emDestaque.map(p => criarCard(p, 'dest')).join('');
             }
 
-            // Gerar botões de categorias
+            // Categorias
             const cats = [...new Set(data.map(p => p.categoria).filter(c => c && c !== 'Geral'))];
-            const filterDiv = document.getElementById('category-filters');
-            filterDiv.innerHTML = `<button class="filter-btn active" onclick="setCategoria('Todas', this)">Todas</button><button class="filter-btn" onclick="setCategoria('Geral', this)">Geral</button>`;
-            cats.forEach(c => filterDiv.innerHTML += `<button class="filter-btn" onclick="setCategoria('${c}', this)">${c}</button>`);
+            const fDiv = document.getElementById('category-filters');
+            fDiv.innerHTML = `<button class="filter-btn active" onclick="setCat('Todas', this)">Todas</button><button class="filter-btn" onclick="setCat('Geral', this)">Geral</button>`;
+            cats.forEach(c => fDiv.innerHTML += `<button class="filter-btn" onclick="setCat('${c}', this)">${c}</button>`);
 
             renderizar();
         }
 
         function renderizar() {
             const termo = document.getElementById('search-input').value.toLowerCase();
-            const ordenacao = document.getElementById('sort-select').value;
+            const sort = document.getElementById('sort-select').value;
             const grid = document.getElementById('portfolio-grid');
             
-            // 1. Filtrar por Categoria e Pesquisa
             let filtrados = todasAsPecas.filter(p => {
                 const matchCat = (categoriaAtiva === 'Todas') || (p.categoria === categoriaAtiva);
                 const matchSearch = p.nome_peca.toLowerCase().includes(termo);
                 return matchCat && matchSearch;
             });
 
-            // 2. Aplicar Ordenação
-            if (ordenacao === 'crescente') {
-                filtrados.sort((a, b) => a.preco_sugerido - b.preco_sugerido);
-            } else if (ordenacao === 'decrescente') {
-                filtrados.sort((a, b) => b.preco_sugerido - a.preco_sugerido);
-            } else if (ordenacao === 'az') {
-                filtrados.sort((a, b) => a.nome_peca.localeCompare(b.nome_peca));
-            } else {
-                // 'recentes' - Assume ordem original (created_at desc)
-                filtrados.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            }
+            if (sort === 'crescente') filtrados.sort((a,b) => a.preco_sugerido - b.preco_sugerido);
+            else if (sort === 'decrescente') filtrados.sort((a,b) => b.preco_sugerido - a.preco_sugerido);
+            else if (sort === 'az') filtrados.sort((a,b) => a.nome_peca.localeCompare(b.nome_peca));
+            else filtrados.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-            // 3. Renderizar
-            if (filtrados.length === 0) {
-                grid.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: #888; padding: 50px 0;">Nenhum produto encontrado...</p>`;
-            } else {
-                grid.innerHTML = filtrados.map(p => criarCard(p, '')).join('');
-            }
+            grid.innerHTML = filtrados.length ? filtrados.map(p => criarCard(p, '')).join('') : `<p style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px;">Sem resultados...</p>`;
         }
 
         function criarCard(p, prefix) {
             const fotos = p.foto_url.split(',');
-            const idUnico = prefix ? `${prefix}-${p.id}` : p.id;
+            const id = prefix ? `${prefix}-${p.id}` : p.id;
+            const isDest = prefix === 'dest';
             return `
-                <div class="card ${prefix === 'dest' ? 'card-destaque' : ''}">
-                    ${prefix === 'dest' ? '<div class="destaque-ribbon">⭐ DESTAQUE</div>' : ''}
+                <div class="card ${isDest ? 'card-destaque' : ''}">
+                    ${isDest ? '<div class="destaque-ribbon">⭐ DESTAQUE</div>' : ''}
                     <div class="carousel">
-                        <div class="carousel-track" onscroll="updateDots(this, '${idUnico}')">
+                        <div class="carousel-track" onscroll="updateDots(this, '${id}')">
                             ${fotos.map(url => `<img src="${url.trim()}" loading="lazy">`).join('')}
                         </div>
-                        ${fotos.length > 1 ? `<div class="dots" id="dots-${idUnico}">${fotos.map((_,i) => `<div class="dot ${i===0?'active':''}"></div>`).join('')}</div>` : ''}
+                        ${fotos.length > 1 ? `<div class="dots" id="dots-${id}">${fotos.map((_,i) => `<div class="dot ${i===0?'active':''}"></div>`).join('')}</div>` : ''}
                     </div>
                     <div class="card-info">
                         <div>
@@ -270,15 +248,14 @@
                             <div class="preco">${p.preco_sugerido}€</div>
                         </div>
                         <div class="order-row">
-                            <input type="number" id="qtd-${idUnico}" value="1" min="1" class="qty">
-                            <button onclick="encomendar('${p.nome_peca.replace(/'/g, "\\'")}', '${idUnico}', ${p.preco_sugerido})" class="btn-order">Encomendar</button>
+                            <input type="number" id="qtd-${id}" value="1" min="1" class="qty">
+                            <button onclick="encomendar('${p.nome_peca.replace(/'/g, "\\'")}', '${id}', ${p.preco_sugerido})" class="btn-order">Encomendar</button>
                         </div>
                     </div>
                 </div>`;
         }
 
-        // Eventos
-        function setCategoria(c, btn) {
+        function setCat(c, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             categoriaAtiva = c;
@@ -288,7 +265,6 @@
         document.getElementById('search-input').addEventListener('input', renderizar);
         document.getElementById('sort-select').addEventListener('change', renderizar);
 
-        // Carrosel e Funcionalidades
         function updateDots(track, id) {
             const dotsContainer = document.getElementById(`dots-${id}`);
             if (!dotsContainer) return;
@@ -299,26 +275,24 @@
 
         function encomendar(nome, id, preco) {
             const qtd = document.getElementById(`qtd-${id}`).value;
-            const total = (qtd * preco).toFixed(2);
-            window.open(`https://wa.me/351911780404?text=Olá Diogo! Encomenda:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${total}€`, '_blank');
+            window.open(`https://wa.me/351911780404?text=Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${(qtd*preco).toFixed(2)}€`, '_blank');
         }
 
         function enviarLinkMaker() {
-            window.open(`https://wa.me/351911780404?text=Olá Diogo! Queria orçamento para este modelo:\n\n🔗 (Link aqui)`, '_blank');
+            window.open(`https://wa.me/351911780404?text=Olá Diogo! Tenho um link do MakerWorld para orçamento:\n\n🔗 (Cola o link aqui)`, '_blank');
         }
 
-        function fecharBanner() { document.getElementById('promo-banner').style.display = 'none'; }
-        
         async function carregarBanner() {
             const { data } = await _supabase.from('config_site').select('*').eq('chave', 'banner').single();
             if (data && data.ativo) {
+                const b = document.getElementById('promo-banner');
                 document.getElementById('promo-texto').innerText = data.valor;
-                document.getElementById('promo-banner').style.display = 'flex';
+                b.style.display = 'block';
             }
         }
 
         carregar(); carregarBanner();
-        setTimeout(() => { document.getElementById('wa-float').style.display = 'flex'; }, 3000);
+        setTimeout(() => { document.getElementById('wa-float').style.display = 'block'; }, 2000);
     </script>
 </body>
 </html>
