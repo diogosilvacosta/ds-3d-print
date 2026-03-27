@@ -23,113 +23,62 @@
 
         /* HERO */
         .hero {
-            height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            height: 40vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
             background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
                         url('https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/fundo.png');
             background-size: cover; background-position: center; background-attachment: fixed; padding: 20px;
         }
-        .logo-hero { max-height: 80px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--accent)); }
-        h1 { font-size: clamp(1.8rem, 6vw, 3rem); margin: 0; font-weight: 900; letter-spacing: -1px; }
-        .slogan { color: var(--accent); font-size: 0.8rem; letter-spacing: 4px; text-transform: uppercase; margin-top: 8px; opacity: 0.8; }
+        .logo-hero { max-height: 70px; margin-bottom: 10px; filter: drop-shadow(0 0 15px var(--accent)); }
+        h1 { font-size: clamp(1.5rem, 5vw, 2.5rem); margin: 0; font-weight: 900; letter-spacing: -1px; }
+        .slogan { color: var(--accent); font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; opacity: 0.8; }
 
-        /* BARRA DE FERRAMENTAS */
-        .tools-container { max-width: 1200px; margin: 30px auto 10px; padding: 0 15px; display: flex; gap: 12px; flex-wrap: wrap; }
-        .search-wrapper { position: relative; flex: 2; min-width: 250px; display: flex; align-items: center; }
-        .search-input {
-            width: 100%; padding: 12px 15px 12px 40px; background: var(--card-bg); 
-            border: 1px solid #222; border-radius: 10px; color: white; font-size: 0.9rem; outline: none; transition: 0.3s;
-        }
-        .search-input:focus { border-color: var(--accent); }
-        .search-icon { position: absolute; left: 15px; color: var(--accent); font-size: 0.9rem; }
+        /* FERRAMENTAS */
+        .tools-container { max-width: 1200px; margin: 20px auto 10px; padding: 0 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-wrapper { position: relative; flex: 2; min-width: 200px; }
+        .search-input { width: 100%; padding: 12px 12px 12px 40px; background: var(--card-bg); border: 1px solid #222; border-radius: 10px; color: white; outline: none; font-size: 0.9rem; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); }
+        .sort-select { flex: 1; padding: 12px; background: var(--card-bg); border: 1px solid #222; border-radius: 10px; color: white; font-size: 0.85rem; cursor: pointer; }
 
-        .sort-wrapper { flex: 1; min-width: 180px; }
-        .sort-select {
-            width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid #222; 
-            border-radius: 10px; color: white; font-size: 0.85rem; cursor: pointer; outline: none;
-            appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff4d4d' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 10px center; background-size: 14px;
-        }
+        /* FILTROS (CATEGORIAS DINÂMICAS) */
+        .filters { display: flex; justify-content: center; gap: 8px; margin: 20px auto 30px; flex-wrap: wrap; max-width: 1200px; padding: 0 15px; }
+        .filter-btn { background: #111; color: #666; border: 1px solid #222; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        /* FILTROS CATEGORIA */
-        .filters { display: flex; justify-content: center; gap: 8px; margin: 20px auto 40px; flex-wrap: wrap; max-width: 1200px; padding: 0 15px; }
-        .filter-btn { 
-            background: #111; color: white; border: 1px solid #222; padding: 8px 16px; 
-            border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
-        }
-        .filter-btn.active { background: var(--accent); border-color: var(--accent); }
+        /* DESTAQUES */
+        .destaque-section { padding: 20px 15px; max-width: 1200px; margin: 0 auto 30px; background: rgba(255, 215, 0, 0.03); border-radius: 15px; }
+        .destaque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
 
-        /* SECCÃO DESTAQUES (MAIS PEQUENA) */
-        .destaque-section { padding: 20px 15px; max-width: 1200px; margin: 0 auto; background: rgba(255, 215, 0, 0.02); border-radius: 15px; }
-        .destaque-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .destaque-header h2 { margin: 0; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); }
-        .destaque-badge { background: var(--gold); color: #000; font-size: 0.6rem; font-weight: 900; padding: 2px 8px; border-radius: 4px; }
-        
-        .destaque-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 15px; 
-        }
-
-        /* GRID PRINCIPAL */
+        /* GRID CATALOGO */
         section { padding: 0 15px 40px; max-width: 1200px; margin: 0 auto; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
 
         /* CARDS */
-        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; position: relative; }
+        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: 0.3s; }
         .card:hover { border-color: var(--accent); transform: translateY(-3px); }
-        .card-destaque { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.05); }
-
-        /* CARROSSEL */
+        .card-destaque { border-color: var(--gold); }
+        
         .carousel { position: relative; width: 100%; aspect-ratio: 1; background: #fff; }
-        .carousel-track { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .carousel-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; height: 100%; }
         .carousel-track::-webkit-scrollbar { display: none; }
-        .carousel-track img { min-width: 100%; max-width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; }
-        
-        .dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 15px; }
-        .dot { width: 5px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s; }
-        .dot.active { background: var(--accent); width: 12px; border-radius: 3px; }
+        .carousel-track img { min-width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; }
 
-        /* INFO ARTIGO */
         .card-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .card-nome { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; }
-        .preco { font-size: 1.3rem; color: var(--accent); font-weight: 900; margin-bottom: 12px; }
+        .card-nome { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; }
+        .preco { font-size: 1.2rem; color: var(--accent); font-weight: 900; margin-bottom: 10px; }
         
-        /* Ajustes menores para destaques */
-        .card-destaque .card-nome { font-size: 0.75rem; }
-        .card-destaque .preco { font-size: 1.1rem; }
-
         .order-row { display: flex; gap: 8px; align-items: center; }
-        .qty { width: 45px; background: #000; border: 1px solid #333; color: white; padding: 8px 2px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
-        .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 6px; font-size: 0.7rem; transition: 0.3s; }
+        .qty { width: 40px; background: #000; border: 1px solid #333; color: white; padding: 8px 2px; text-align: center; border-radius: 5px; font-size: 0.8rem; }
+        .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
 
-        .destaque-ribbon { position: absolute; top: 8px; left: 8px; background: var(--gold); color: #000; font-size: 0.55rem; font-weight: 900; padding: 2px 6px; border-radius: 3px; z-index: 10; }
+        /* FOOTER & FLOATING */
+        footer { text-align: center; padding: 30px; color: #333; font-size: 0.7rem; letter-spacing: 1px; }
+        .wa-float { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+        .wa-btn { background: var(--accent); color: white; padding: 12px 18px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.8rem; box-shadow: 0 5px 15px rgba(255,77,77,0.3); }
 
-        /* OUTROS */
-        .maker-section { margin-top: 50px; background: #111; border: 1px dashed #333; border-radius: 15px; padding: 30px; text-align: center; }
-        .maker-title { color: var(--accent); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 10px; }
-        .maker-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 20px; }
-        
-        .contact-bar { display: flex; justify-content: center; gap: 10px; padding: 10px; background: #0f0f0f; flex-wrap: wrap; }
-        .contact-bar a { padding: 8px 15px; border-radius: 5px; font-size: 0.7rem; font-weight: 700; text-decoration: none; text-transform: uppercase; border: 1px solid var(--accent); color: white; }
-        
-        .wa-float { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
-        .wa-btn { background: var(--accent); color: white; padding: 12px 20px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255,77,77,0.3); }
-
-        footer { text-align: center; padding: 40px; color: #333; font-size: 0.7rem; letter-spacing: 2px; border-top: 1px solid #111; }
-        
-        @media (max-width: 600px) { .wa-btn span { display: none; } .wa-btn { padding: 15px; border-radius: 50%; } }
+        @media (max-width: 600px) { .wa-btn span { display: none; } }
     </style>
 </head>
 <body>
-
-    <div class="promo-banner" id="promo-banner" style="display:none; background: var(--accent); text-align: center; padding: 8px; font-size: 0.8rem; font-weight: bold;">
-        <span id="promo-texto"></span>
-    </div>
-
-    <div class="contact-bar">
-        <a href="https://wa.me/351911780404" style="background: var(--accent);" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-        <a href="https://www.instagram.com/ds_3dprint" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-    </div>
 
     <div class="hero">
         <img src="https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/logo.png" class="logo-hero">
@@ -140,46 +89,30 @@
     <div class="tools-container">
         <div class="search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="search-input" class="search-input" placeholder="O que procuras?">
+            <input type="text" id="search-input" class="search-input" placeholder="Pesquisar produto...">
         </div>
-        <div class="sort-wrapper">
-            <select id="sort-select" class="sort-select">
-                <option value="recentes">Novidades</option>
-                <option value="crescente">Preço: Baixo para Alto</option>
-                <option value="decrescente">Preço: Alto para Baixo</option>
-                <option value="az">Nome: A - Z</option>
-            </select>
-        </div>
+        <select id="sort-select" class="sort-select">
+            <option value="recentes">Novidades</option>
+            <option value="crescente">Preço: Baixo p/ Alto</option>
+            <option value="decrescente">Preço: Alto p/ Baixo</option>
+        </select>
     </div>
 
     <div class="filters" id="category-filters"></div>
 
     <div class="destaque-section" id="destaque-section" style="display:none;">
-        <div class="destaque-header">
-            <h2>⭐ Em Destaque</h2>
-            <span class="destaque-badge">TOP</span>
-        </div>
+        <h2 style="font-size: 0.8rem; color: var(--gold); text-transform: uppercase; margin-bottom: 15px;">⭐ Em Destaque</h2>
         <div class="destaque-grid" id="destaque-grid"></div>
     </div>
 
     <section>
-        <div class="grid" id="portfolio-grid">
-            <p style="text-align: center; grid-column: 1/-1; color: #444;">A carregar catálogo...</p>
-        </div>
-
-        <div class="maker-section">
-            <h2 class="maker-title">Tens um link do MakerWorld?</h2>
-            <p class="maker-text">Nós imprimimos para ti com a máxima qualidade.</p>
-            <button onclick="enviarLinkMaker()" class="btn-order" style="max-width: 200px; margin: 0 auto; display: block;">Pedir Orçamento</button>
-        </div>
+        <div class="grid" id="portfolio-grid"></div>
     </section>
 
     <footer>© 2026 DS 3D PRINT | ENGENHARIA EM MOVIMENTO</footer>
 
     <div class="wa-float" id="wa-float" style="display:none;">
-        <a href="https://wa.me/351911780404" class="wa-btn" target="_blank">
-            <i class="fab fa-whatsapp"></i> <span>Encomendar</span>
-        </a>
+        <a href="https://wa.me/351911780404" class="wa-btn" target="_blank"><i class="fab fa-whatsapp"></i> <span>Encomendar</span></a>
     </div>
 
     <script>
@@ -190,22 +123,51 @@
         let todasAsPecas = [];
         let categoriaAtiva = 'Todas';
 
+        // CONFIGURAÇÃO DE PALAVRAS-CHAVE PARA CATEGORIAS AUTOMÁTICAS
+        const regrasCategorias = [
+            { chave: 'suporte', nome: 'Suportes' },
+            { chave: 'vaso', nome: 'Vasos' },
+            { chave: 'articulado', nome: 'Articulados' },
+            { chave: 'organizador', nome: 'Organizadores' },
+            { chave: 'decoração', nome: 'Decoração' },
+            { chave: 'ferramenta', nome: 'Ferramentas' }
+        ];
+
         async function carregar() {
             const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
-            todasAsPecas = data;
             
-            // Destaques (Compactos)
-            const emDestaque = data.filter(p => p.destaque);
+            // Atribuir categorias automáticas baseadas no nome se não houver categoria definida
+            todasAsPecas = data.map(p => {
+                let catAuto = p.categoria || 'Outros';
+                const nomeLow = p.nome_peca.toLowerCase();
+                
+                // Se a categoria for "Geral" ou vazia, tenta encontrar uma palavra-chave
+                if (!p.categoria || p.categoria === 'Geral') {
+                    for (let regra of regrasCategorias) {
+                        if (nomeLow.includes(regra.chave)) {
+                            catAuto = regra.nome;
+                            break;
+                        }
+                    }
+                }
+                return { ...p, categoria_final: catAuto };
+            });
+
+            // Gerar botões de categorias baseados nas categorias encontradas
+            const categoriasUnicas = [...new Set(todasAsPecas.map(p => p.categoria_final))].sort();
+            const fDiv = document.getElementById('category-filters');
+            
+            fDiv.innerHTML = `<button class="filter-btn active" onclick="setCat('Todas', this)">Todas</button>`;
+            categoriasUnicas.forEach(cat => {
+                fDiv.innerHTML += `<button class="filter-btn" onclick="setCat('${cat}', this)">${cat}</button>`;
+            });
+
+            // Destaques
+            const emDestaque = todasAsPecas.filter(p => p.destaque);
             if (emDestaque.length > 0) {
                 document.getElementById('destaque-section').style.display = 'block';
                 document.getElementById('destaque-grid').innerHTML = emDestaque.map(p => criarCard(p, 'dest')).join('');
             }
-
-            // Categorias
-            const cats = [...new Set(data.map(p => p.categoria).filter(c => c && c !== 'Geral'))];
-            const fDiv = document.getElementById('category-filters');
-            fDiv.innerHTML = `<button class="filter-btn active" onclick="setCat('Todas', this)">Todas</button><button class="filter-btn" onclick="setCat('Geral', this)">Geral</button>`;
-            cats.forEach(c => fDiv.innerHTML += `<button class="filter-btn" onclick="setCat('${c}', this)">${c}</button>`);
 
             renderizar();
         }
@@ -216,26 +178,23 @@
             const grid = document.getElementById('portfolio-grid');
             
             let filtrados = todasAsPecas.filter(p => {
-                const matchCat = (categoriaAtiva === 'Todas') || (p.categoria === categoriaAtiva);
+                const matchCat = (categoriaAtiva === 'Todas') || (p.categoria_final === categoriaAtiva);
                 const matchSearch = p.nome_peca.toLowerCase().includes(termo);
                 return matchCat && matchSearch;
             });
 
             if (sort === 'crescente') filtrados.sort((a,b) => a.preco_sugerido - b.preco_sugerido);
             else if (sort === 'decrescente') filtrados.sort((a,b) => b.preco_sugerido - a.preco_sugerido);
-            else if (sort === 'az') filtrados.sort((a,b) => a.nome_peca.localeCompare(b.nome_peca));
             else filtrados.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-            grid.innerHTML = filtrados.length ? filtrados.map(p => criarCard(p, '')).join('') : `<p style="grid-column: 1/-1; text-align: center; color: #555; padding: 40px;">Sem resultados...</p>`;
+            grid.innerHTML = filtrados.map(p => criarCard(p, '')).join('');
         }
 
         function criarCard(p, prefix) {
             const fotos = p.foto_url.split(',');
             const id = prefix ? `${prefix}-${p.id}` : p.id;
-            const isDest = prefix === 'dest';
             return `
-                <div class="card ${isDest ? 'card-destaque' : ''}">
-                    ${isDest ? '<div class="destaque-ribbon">⭐ DESTAQUE</div>' : ''}
+                <div class="card ${prefix==='dest'?'card-destaque':''}">
                     <div class="carousel">
                         <div class="carousel-track" onscroll="updateDots(this, '${id}')">
                             ${fotos.map(url => `<img src="${url.trim()}" loading="lazy">`).join('')}
@@ -262,9 +221,6 @@
             renderizar();
         }
 
-        document.getElementById('search-input').addEventListener('input', renderizar);
-        document.getElementById('sort-select').addEventListener('change', renderizar);
-
         function updateDots(track, id) {
             const dotsContainer = document.getElementById(`dots-${id}`);
             if (!dotsContainer) return;
@@ -278,20 +234,10 @@
             window.open(`https://wa.me/351911780404?text=Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${(qtd*preco).toFixed(2)}€`, '_blank');
         }
 
-        function enviarLinkMaker() {
-            window.open(`https://wa.me/351911780404?text=Olá Diogo! Tenho um link do MakerWorld para orçamento:\n\n🔗 (Cola o link aqui)`, '_blank');
-        }
+        document.getElementById('search-input').addEventListener('input', renderizar);
+        document.getElementById('sort-select').addEventListener('change', renderizar);
 
-        async function carregarBanner() {
-            const { data } = await _supabase.from('config_site').select('*').eq('chave', 'banner').single();
-            if (data && data.ativo) {
-                const b = document.getElementById('promo-banner');
-                document.getElementById('promo-texto').innerText = data.valor;
-                b.style.display = 'block';
-            }
-        }
-
-        carregar(); carregarBanner();
+        carregar();
         setTimeout(() => { document.getElementById('wa-float').style.display = 'block'; }, 2000);
     </script>
 </body>
