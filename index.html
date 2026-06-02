@@ -35,12 +35,36 @@
         #site-banner {
             background: var(--red);
             color: #fff;
-            text-align: center;
-            padding: 9px 16px;
+            overflow: hidden;
+            white-space: nowrap;
             font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.5px;
             display: none;
+        }
+
+        #site-banner .banner-track {
+            display: inline-flex;
+            gap: 60px;
+            min-width: max-content;
+            padding-left: 100%;
+            animation: banner-scroll 18s linear infinite;
+        }
+
+        #site-banner .banner-track span {
+            flex-shrink: 0;
+            padding: 9px 0;
+        }
+
+        #site-banner .banner-track span::after {
+            content: "•";
+            margin-left: 60px;
+            opacity: 0.6;
+        }
+
+        @keyframes banner-scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
         }
 
         /* ─── NAVBAR ─── */
@@ -603,8 +627,13 @@ async function loadBanner() {
     const { data } = await _supabase.from('config_site').select('*').eq('chave','banner').single();
     if (data && data.ativo && data.valor) {
         const b = document.getElementById('site-banner');
-        b.textContent = data.valor;
         b.style.display = 'block';
+        const t = data.valor;
+        b.innerHTML = `
+            <div class="banner-track">
+                <span>${t}</span><span>${t}</span><span>${t}</span>
+                <span>${t}</span><span>${t}</span><span>${t}</span>
+            </div>`;
     }
 }
 
