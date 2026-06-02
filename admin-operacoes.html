@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Operacoes | DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-common.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="hero-admin">
+            <div class="hero-badge">Operacoes</div>
+            <h1>Stock e Vendas</h1>
+            <p>Painel dedicado a entradas, saidas, vendas e conferencias internas sem misturar com a edicao do catalogo.</p>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <a class="nav-link" href="admin.html">Visao Geral</a>
+        <a class="nav-link" href="admin-catalogo.html">Catalogo</a>
+        <a class="nav-link" href="admin-site.html">Site</a>
+        <a class="nav-link active" href="admin-operacoes.html">Operacoes</a>
+        <a class="nav-link" href="index.html">Ver Site</a>
+    </nav>
+
+    <div id="login-section" class="admin-panel login-box">
+        <div class="card-head">
+            <h2>Acesso</h2>
+        </div>
+        <p class="card-subtitle">Entra com o utilizador autorizado para gerir stock e vendas.</p>
+        <label>Utilizador</label>
+        <input type="text" id="user" placeholder="Utilizador">
+        <label>Password</label>
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="adminLogin()" style="margin-top: 14px;">Entrar</button>
+    </div>
+
+    <div id="app-shell" class="admin-panel hidden">
+        <div class="admin-header">
+            <div>
+                <h2>Operacoes Internas</h2>
+                <p class="card-subtitle">Regista movimentos, acompanha stock e confirma a faturacao interna.</p>
+            </div>
+            <button onclick="logout()" class="mini-btn btn-secondary">Sair</button>
+        </div>
+
+        <div class="admin-grid-2">
+            <div class="admin-card">
+                <div class="card-head">
+                    <div>
+                        <h3>Novo Movimento</h3>
+                        <p class="card-subtitle">Venda, entrada de stock ou ajuste manual.</p>
+                    </div>
+                </div>
+
+                <label>Produto</label>
+                <select id="mov-produto" onchange="atualizarPrecoPadrao(); atualizarResumoProduto();"></select>
+                <div id="produto-resumo" class="field-note">Seleciona um produto para veres o stock atual e o preco sugerido.</div>
+
+                <label>Tipo de movimento</label>
+                <select id="mov-tipo" onchange="atualizarPrecoPadrao(); atualizarResumoProduto();">
+                    <option value="venda">Venda / dar baixa</option>
+                    <option value="entrada">Entrada de stock</option>
+                    <option value="ajuste">Ajuste manual</option>
+                </select>
+                <div class="field-note">No ajuste manual, a quantidade passa a ser o novo stock final do artigo.</div>
+
+                <label>Quantidade</label>
+                <input type="number" id="mov-quantidade" min="0" step="1" placeholder="0">
+
+                <label>Preco unitario (EUR)</label>
+                <input type="number" id="mov-preco" min="0" step="0.01" placeholder="0.00">
+
+                <label>Notas</label>
+                <textarea id="mov-notas" rows="4" placeholder="Ex: venda Instagram, reposicao PLA preto, acerto de inventario..."></textarea>
+
+                <button onclick="registarMovimento()" class="btn-success" style="margin-top: 14px;">Guardar movimento</button>
+                <div id="interno-status" class="status">O resumo abaixo e calculado a partir dos movimentos internos guardados na base de dados.</div>
+            </div>
+
+            <div class="stack">
+                <div class="admin-card">
+                    <div class="card-head">
+                        <div>
+                            <h3>Resumo</h3>
+                            <p class="card-subtitle">Leitura rapida da atividade e do stock.</p>
+                        </div>
+                    </div>
+                    <div id="interno-stats" class="stats-grid"></div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-head">
+                        <div>
+                            <h3>Movimentos Recentes</h3>
+                            <p class="card-subtitle">Ultimas operacoes registadas neste painel.</p>
+                        </div>
+                    </div>
+                    <div id="movimentos-lista" class="movement-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card" style="margin-top: 18px;">
+            <div class="card-head">
+                <div>
+                    <h3>Mapa de Stock</h3>
+                    <p class="card-subtitle">Define stock minimo por artigo e acompanha saldo, vendas e faturacao interna.</p>
+                </div>
+            </div>
+            <div id="stock-lista" class="table-wrap"></div>
+        </div>
+    </div>
+
+    <script src="admin-common.js"></script>
+    <script>
+        wireLoginEnter();
+
+        let produtos = [];
+        let estadoOperacoes = { stock: {}, movimentos: [] };
+
+        function produtoPorId(id) {
+            return produtos.find((produto) => String(produto.id) === String(id));
+        }
+
+        function obterStockProduto(id) {
+            const atual = estadoOperacoes.stock[String(id)] || {};
+            return {
+                quantidade: Number(atual.quantidade) || 0,
+                minimo: Number(atual.minimo) || 0
+            };
+        }
+
+        function escreverStatus(texto, tipo = "") {
+            const status = document.getElementById("interno-status");
+            status.className = `status${tipo ? ` ${tipo}` : ""}`;
+            status.innerText = texto;
+        }
+
+        function preencherProdutos() {
+            const select = document.getElementById("mov-produto");
+            const atual = select.value;
+            select.innerHTML = '<option value="">Seleciona um produto</option>';
+            produtos.forEach((produto) => {
+                select.innerHTML += `<option value="${produto.id}">${produto.nome_peca}</option>`;
+            });
+            if ([...select.options].some((option) => option.value === atual)) {
+                select.value = atual;
+            }
+        }
+
+        function atualizarPrecoPadrao() {
+            const produto = produtoPorId(document.getElementById("mov-produto").value);
+            const tipo = document.getElementById("mov-tipo").value;
+            const input = document.getElementById("mov-preco");
+
+            if (!produto) {
+                input.value = "";
+                return;
+            }
+
+            input.value = tipo === "venda" ? Number(produto.preco_sugerido || 0).toFixed(2) : "";
+        }
+
+        function atualizarResumoProduto() {
+            const produto = produtoPorId(document.getElementById("mov-produto").value);
+            const tipo = document.getElementById("mov-tipo").value;
+            const box = document.getElementById("produto-resumo");
+
+            if (!produto) {
+                box.innerText = "Seleciona um produto para veres o stock atual e o preco sugerido.";
+                return;
+            }
+
+            const stock = obterStockProduto(produto.id);
+            const frase = tipo === "ajuste"
+                ? "No ajuste manual, a quantidade passa a ser o novo stock final."
+                : tipo === "entrada"
+                    ? "Na entrada, a quantidade soma ao stock atual."
+                    : "Na venda, a quantidade sai do stock atual.";
+
+            box.innerText = `Stock atual: ${stock.quantidade} | Stock minimo: ${stock.minimo} | Preco sugerido: ${formatEuro(produto.preco_sugerido)}. ${frase}`;
+        }
+
+        function calcularResumo() {
+            const resumo = { vendidas: 0, faturacao: 0, stockTotal: 0, stockBaixo: 0 };
+
+            produtos.forEach((produto) => {
+                const stock = obterStockProduto(produto.id);
+                resumo.stockTotal += stock.quantidade;
+                if (stock.minimo > 0 && stock.quantidade <= stock.minimo) resumo.stockBaixo += 1;
+            });
+
+            estadoOperacoes.movimentos.forEach((mov) => {
+                if (mov.tipo === "venda") {
+                    resumo.vendidas += Number(mov.quantidade) || 0;
+                    resumo.faturacao += (Number(mov.quantidade) || 0) * (Number(mov.precoUnitario) || 0);
+                }
+            });
+
+            return resumo;
+        }
+
+        function renderOperacoes() {
+            const resumo = calcularResumo();
+            document.getElementById("interno-stats").innerHTML = `
+                <div class="stat-box"><span>Stock Total</span><strong>${resumo.stockTotal}</strong></div>
+                <div class="stat-box"><span>Unidades Vendidas</span><strong>${resumo.vendidas}</strong></div>
+                <div class="stat-box"><span>Faturacao Interna</span><strong>${formatEuro(resumo.faturacao)}</strong></div>
+                <div class="stat-box"><span>Stock Baixo</span><strong>${resumo.stockBaixo}</strong></div>
+            `;
+
+            const movimentos = [...estadoOperacoes.movimentos]
+                .sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0))
+                .slice(0, 8);
+
+            document.getElementById("movimentos-lista").innerHTML = movimentos.length
+                ? movimentos.map((mov) => {
+                    const produto = produtoPorId(mov.produtoId);
+                    const nome = produto ? produto.nome_peca : "Produto removido";
+                    const tipo = mov.tipo === "venda" ? "Venda" : mov.tipo === "entrada" ? "Entrada" : "Ajuste";
+                    const total = mov.tipo === "venda"
+                        ? ` | ${formatEuro((Number(mov.quantidade) || 0) * (Number(mov.precoUnitario) || 0))}`
+                        : "";
+                    return `
+                        <div class="movement-item">
+                            <strong>${nome}</strong>
+                            <div class="movement-meta">${tipo} | Qtd: ${Number(mov.quantidade) || 0}${total}</div>
+                            <div class="movement-meta">Stock: ${Number(mov.stockAntes) || 0} -> ${Number(mov.stockDepois) || 0}</div>
+                            <div class="movement-meta">${new Date(mov.data).toLocaleString("pt-PT")}${mov.notas ? ` | ${mov.notas}` : ""}</div>
+                        </div>
+                    `;
+                }).join("")
+                : '<div class="preview-placeholder">Ainda nao ha movimentos internos registados.</div>';
+
+            const rows = produtos.map((produto) => {
+                const stock = obterStockProduto(produto.id);
+                const vendas = estadoOperacoes.movimentos
+                    .filter((mov) => String(mov.produtoId) === String(produto.id) && mov.tipo === "venda")
+                    .reduce((sum, mov) => sum + (Number(mov.quantidade) || 0), 0);
+                const faturado = estadoOperacoes.movimentos
+                    .filter((mov) => String(mov.produtoId) === String(produto.id) && mov.tipo === "venda")
+                    .reduce((sum, mov) => sum + ((Number(mov.quantidade) || 0) * (Number(mov.precoUnitario) || 0)), 0);
+
+                return `
+                    <tr>
+                        <td>${produto.nome_peca}</td>
+                        <td class="${stock.minimo > 0 && stock.quantidade <= stock.minimo ? "stock-low" : ""}">${stock.quantidade}</td>
+                        <td><input type="number" id="min-${produto.id}" min="0" step="1" value="${stock.minimo}"></td>
+                        <td>${vendas}</td>
+                        <td>${formatEuro(faturado)}</td>
+                        <td><button class="mini-btn btn-secondary" onclick="guardarMinimo('${produto.id}')">Guardar min.</button></td>
+                    </tr>
+                `;
+            }).join("");
+
+            document.getElementById("stock-lista").innerHTML = `
+                <table class="stock-table">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Stock Atual</th>
+                            <th>Stock Minimo</th>
+                            <th>Vendidas</th>
+                            <th>Faturacao</th>
+                            <th>Acao</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows || '<tr><td colspan="6">Sem produtos no catalogo.</td></tr>'}</tbody>
+                </table>
+            `;
+        }
+
+        async function guardarMinimo(produtoId) {
+            const stock = obterStockProduto(produtoId);
+            estadoOperacoes.stock[String(produtoId)] = {
+                quantidade: stock.quantidade,
+                minimo: Math.max(0, Number(document.getElementById(`min-${produtoId}`).value) || 0)
+            };
+
+            const { error } = await saveOperacoesState(estadoOperacoes);
+            if (error) {
+                escreverStatus("Erro ao guardar o stock minimo.", "error");
+                return;
+            }
+
+            escreverStatus("Stock minimo atualizado.", "ok");
+            atualizarResumoProduto();
+            renderOperacoes();
+        }
+
+        async function registarMovimento() {
+            const produtoId = document.getElementById("mov-produto").value;
+            const tipo = document.getElementById("mov-tipo").value;
+            const quantidade = Math.max(0, Number(document.getElementById("mov-quantidade").value) || 0);
+            const precoUnitario = Math.max(0, Number(document.getElementById("mov-preco").value) || 0);
+            const notas = document.getElementById("mov-notas").value.trim();
+
+            if (!produtoId || quantidade <= 0) {
+                escreverStatus("Escolhe um produto e uma quantidade valida.", "error");
+                return;
+            }
+
+            const stock = obterStockProduto(produtoId);
+            let stockDepois = stock.quantidade;
+            if (tipo === "entrada") stockDepois = stock.quantidade + quantidade;
+            if (tipo === "venda") stockDepois = stock.quantidade - quantidade;
+            if (tipo === "ajuste") stockDepois = quantidade;
+
+            if (tipo === "venda" && stockDepois < 0) {
+                escreverStatus("Nao podes dar baixa acima do stock atual.", "error");
+                return;
+            }
+
+            const estadoAnterior = JSON.stringify(estadoOperacoes);
+            estadoOperacoes.stock[String(produtoId)] = { quantidade: stockDepois, minimo: stock.minimo };
+            estadoOperacoes.movimentos.push({
+                id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                produtoId,
+                tipo,
+                quantidade,
+                precoUnitario,
+                notas,
+                stockAntes: stock.quantidade,
+                stockDepois,
+                data: new Date().toISOString()
+            });
+
+            const { error } = await saveOperacoesState(estadoOperacoes);
+            if (error) {
+                estadoOperacoes = JSON.parse(estadoAnterior);
+                escreverStatus("Erro ao guardar o movimento.", "error");
+                return;
+            }
+
+            document.getElementById("mov-quantidade").value = "";
+            document.getElementById("mov-notas").value = "";
+            atualizarPrecoPadrao();
+            atualizarResumoProduto();
+            renderOperacoes();
+            escreverStatus("Movimento guardado com sucesso.", "ok");
+        }
+
+        async function loadOperacoesPage() {
+            const [{ data }, operacoes] = await Promise.all([
+                adminSupabase.from("pecas_portfolio").select("*").order("created_at", { ascending: false }),
+                loadOperacoesState()
+            ]);
+
+            produtos = data || [];
+            estadoOperacoes = operacoes;
+            preencherProdutos();
+            atualizarPrecoPadrao();
+            atualizarResumoProduto();
+            renderOperacoes();
+        }
+
+        setupAdminPage(loadOperacoesPage);
+    </script>
+</body>
+</html>

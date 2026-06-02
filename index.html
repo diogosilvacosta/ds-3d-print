@@ -4,109 +4,459 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DS 3D PRINT | Engenharia & Design</title>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card-bg: #141414;
+            --bg: #070707;
+            --card-bg: #131313;
+            --panel-bg: rgba(15, 15, 15, 0.86);
             --text: #ffffff;
+            --muted: #b8b8b8;
             --accent: #ff4d4d;
-            --accent-hover: #cc0000;
+            --accent-hover: #d93232;
             --gray: #888;
             --gold: #ffd700;
+            --line: rgba(255, 255, 255, 0.08);
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            color: var(--text);
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(255, 77, 77, 0.15), transparent 30%),
+                linear-gradient(180deg, #0e0e0e 0%, #070707 34%, #050505 100%);
+        }
 
-        /* HERO */
         .hero {
-            height: auto; min-height: 40vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                        url('https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/fundo.png');
-            background-size: cover; background-position: center; background-attachment: fixed; padding: 40px 20px;
+            min-height: 40vh;
+            padding: 0 20px 42px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background:
+                linear-gradient(rgba(0,0,0,0.84), rgba(0,0,0,0.88)),
+                url('https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/fundo.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
-        .logo-hero { max-height: 80px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--accent)); }
-        h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin: 0; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
-
-        /* CONTACTOS RÁPIDOS */
-        .quick-contacts { display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap; justify-content: center; }
-        .contact-chip { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white; padding: 10px 18px; border-radius: 50px; text-decoration: none;
-            font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 8px;
-            transition: 0.3s; backdrop-filter: blur(5px);
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top center, rgba(255, 77, 77, 0.18), transparent 34%),
+                linear-gradient(180deg, rgba(255, 77, 77, 0.08), transparent 28%);
+            pointer-events: none;
         }
-        .contact-chip:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
-        /* FERRAMENTAS (PESQUISA + ORDENAÇÃO) - CORREÇÃO DE POSICIONAMENTO */
-        .tools-section { max-width: 1200px; margin: 20px auto; padding: 0 15px; position: relative; }
-        .tools-container { 
-            display: flex; gap: 15px; flex-wrap: wrap; background: var(--card-bg); 
-            padding: 15px; border-radius: 12px; border: 1px solid #222; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        .news-ticker {
+            width: min(1240px, calc(100% - 22px));
+            margin: 0 auto;
+            padding-top: 8px;
+            position: relative;
+            z-index: 2;
+        }
+        .news-ticker.hidden { display: none; }
+        .news-ticker-shell {
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            border: 1px solid rgba(255, 77, 77, 0.22);
+            background: rgba(8, 8, 8, 0.78);
+            overflow: hidden;
+        }
+        .news-marquee {
+            flex: 1;
+            overflow: hidden;
+        }
+        .news-track {
+            min-width: max-content;
+            display: inline-flex;
+            align-items: center;
+            gap: 42px;
+            padding-left: 100%;
+            animation: ticker-scroll 18s linear infinite;
+        }
+        .news-track span {
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #f1f1f1;
+        }
+        .news-track span::before {
+            content: "";
+            margin-right: 0;
+        }
+        .news-track span::after {
+            content: "•";
+            color: var(--accent);
+            margin-left: 42px;
+            font-size: 0.9rem;
+        }
+        @keyframes ticker-scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+
+        .hero-content {
+            width: 100%;
+            max-width: 920px;
+            position: relative;
+            z-index: 1;
+            padding-top: 38px;
+        }
+        .logo-hero {
+            max-height: 86px;
+            margin-bottom: 14px;
+            filter: drop-shadow(0 0 18px rgba(255, 77, 77, 0.65));
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 18px auto 0;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 14px 34px rgba(0,0,0,0.28);
+            text-transform: uppercase;
+            letter-spacing: 0.34em;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #ffe3e3;
+        }
+        .hero-badge::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 18px rgba(255, 77, 77, 0.88);
+        }
+        h1 {
+            margin: 18px 0 0;
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            line-height: 0.92;
+            letter-spacing: -0.08em;
+            text-transform: uppercase;
+        }
+        .hero-subtitle {
+            max-width: 650px;
+            margin: 20px auto 0;
+            color: #dddddd;
+            font-size: 1.02rem;
+            line-height: 1.75;
+        }
+
+        .quick-contacts {
+            display: flex;
+            gap: 10px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .contact-chip {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.76rem;
+            font-weight: 700;
+            transition: 0.25s ease;
+            backdrop-filter: blur(6px);
+        }
+        .contact-chip:hover {
+            transform: translateY(-2px);
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .tools-section {
+            max-width: 1200px;
+            margin: 22px auto;
+            padding: 0 15px;
+            position: relative;
+        }
+        .tools-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            box-shadow: 0 18px 36px rgba(0,0,0,0.26);
         }
         .search-wrapper { position: relative; flex: 2; min-width: 250px; }
-        .search-input { 
-            width: 100%; padding: 12px 12px 12px 40px; background: #000; 
-            border: 1px solid #333; border-radius: 8px; color: white; outline: none; font-size: 0.9rem;
-            box-sizing: border-box;
+        .search-input,
+        .sort-select,
+        .qty {
+            background: #090909;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: white;
+            outline: none;
         }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); }
-        .sort-select { 
-            flex: 1; min-width: 150px; padding: 12px; background: #000; 
-            border: 1px solid #333; border-radius: 8px; color: white; font-size: 0.85rem; cursor: pointer; 
+        .search-input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+        }
+        .sort-select {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            cursor: pointer;
         }
 
-        /* FILTROS CATEGORIAS - GARANTIR ESPAÇO */
-        .filters { 
-            display: flex; justify-content: center; gap: 8px; 
-            margin: 20px auto 40px; flex-wrap: wrap; max-width: 1200px; padding: 0 15px; 
-            position: relative; z-index: 5;
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 22px auto 38px;
+            padding: 0 15px;
         }
-        .filter-btn { background: #111; color: #fff; border: 1px solid #222; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
-        .filter-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 4px 10px rgba(255,77,77,0.2); }
+        .filter-btn {
+            background: rgba(255,255,255,0.04);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.74rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: 0.25s ease;
+        }
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 10px 24px rgba(255,77,77,0.22);
+        }
 
-        /* DESTAQUES */
-        .destaque-section { padding: 20px 15px; max-width: 1200px; margin: 0 auto 40px; }
-        .destaque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .destaque-section,
+        section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px 40px;
+        }
+        .destaque-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .destaque-head h2 {
+            margin: 0;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-size: 0.82rem;
+            letter-spacing: 0.24em;
+        }
+        .destaque-head p {
+            margin: 0;
+            color: #ababab;
+            font-size: 0.82rem;
+        }
+        .destaque-grid,
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+        .destaque-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+        .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-        /* GRID PRINCIPAL */
-        section { padding: 0 15px 40px; max-width: 1200px; margin: 0 auto; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            box-shadow: 0 18px 34px rgba(0,0,0,0.2);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 77, 77, 0.32);
+            box-shadow: 0 22px 46px rgba(0,0,0,0.28);
+        }
+        .carousel {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(180deg, #fafafa, #f0f0f0);
+        }
+        .carousel-track {
+            display: flex;
+            height: 100%;
+            overflow-x: auto;
+            scrollbar-width: none;
+            scroll-snap-type: x mandatory;
+        }
+        .carousel-track::-webkit-scrollbar { display: none; }
+        .carousel-track img {
+            min-width: 100%;
+            height: 100%;
+            object-fit: contain;
+            scroll-snap-align: start;
+        }
+        .dots {
+            position: absolute;
+            left: 50%;
+            bottom: 12px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.36);
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+        }
+        .dot.active { background: var(--accent); }
 
-        /* CARDS */
-        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: 0.3s; }
-        .card:hover { border-color: var(--accent); transform: translateY(-3px); }
-        .carousel { position: relative; width: 100%; aspect-ratio: 1; background: #fff; }
-        .carousel-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; height: 100%; }
-        .carousel-track img { min-width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; }
-        
-        .card-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .card-nome { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 5px; min-height: 2.4em; }
-        .preco { font-size: 1.3rem; color: var(--accent); font-weight: 900; margin-bottom: 12px; }
-        
-        .order-row { display: flex; gap: 8px; align-items: center; }
-        .qty { width: 45px; background: #000; border: 1px solid #333; color: white; padding: 8px 2px; text-align: center; border-radius: 5px; }
-        .btn-order { flex: 1; background: var(--accent); color: white; border: none; padding: 10px; font-weight: bold; border-radius: 6px; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
+        .card-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+            flex-grow: 1;
+        }
+        .card-nome {
+            min-height: 2.5em;
+            margin-bottom: 6px;
+            color: #ffffff;
+            font-size: 0.88rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .preco {
+            color: var(--accent);
+            font-size: 1.34rem;
+            font-weight: 900;
+        }
+        .order-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .qty {
+            width: 52px;
+            padding: 10px 4px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .btn-order {
+            flex: 1;
+            border: none;
+            border-radius: 10px;
+            padding: 11px;
+            background: linear-gradient(135deg, var(--accent), #ff6f4d);
+            color: white;
+            cursor: pointer;
+            font-size: 0.76rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .btn-order:hover { background: linear-gradient(135deg, var(--accent-hover), #ff5d39); }
 
-        .wa-float { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
-        .wa-btn { background: #25D366; color: white; padding: 14px 22px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; }
+        .wa-float {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1000;
+        }
+        .wa-btn {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 22px;
+            border-radius: 999px;
+            font-weight: 800;
+            background: #25D366;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+        }
 
-        @media (max-width: 600px) { .wa-btn span { display: none; } }
+        @media (max-width: 720px) {
+            .hero { padding: 0 14px 34px; background-attachment: scroll; }
+            .hero-content { padding-top: 24px; }
+            .hero-badge { letter-spacing: 0.18em; font-size: 0.64rem; }
+            h1 { font-size: clamp(2.3rem, 14vw, 4rem); }
+            .hero-subtitle { font-size: 0.93rem; }
+            .news-ticker { width: calc(100% - 12px); padding-top: 6px; }
+            .news-ticker-shell { min-height: 38px; padding: 0 10px; }
+            .news-track span { font-size: 0.74rem; }
+            .news-track span::after { margin-left: 28px; }
+            .destaque-head { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 600px) {
+            .wa-btn span { display: none; }
+        }
     </style>
 </head>
 <body>
 
     <div class="hero">
-        <img src="https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/logo.png" class="logo-hero">
-        <h1>DS 3D PRINT</h1>
-        
-        <div class="quick-contacts">
-            <a href="https://wa.me/351911780404" class="contact-chip" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-            <a href="https://www.instagram.com/ds_3dprint" class="contact-chip" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-            <a href="tel:+351911780404" class="contact-chip"><i class="fas fa-phone-alt"></i> Ligar</a>
+        <div class="news-ticker hidden" id="news-ticker">
+            <div class="news-ticker-shell">
+                <div class="news-marquee">
+                    <div class="news-track" id="news-track"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-content">
+            <img src="https://wxwdvixxcrduzneqjfwo.supabase.co/storage/v1/object/public/fotos_pecas/logo.png" class="logo-hero" alt="DS 3D Print">
+            <div class="hero-badge">Impressão 3D em Portugal</div>
+            <h1>DS 3D PRINT</h1>
+            <p class="hero-subtitle">Transformamos as tuas ideias em peças reais, com impressão 3D personalizada, qualidade garantida e entrega rápida.</p>
+
+            <div class="quick-contacts">
+                <a href="https://wa.me/351911780404" class="contact-chip" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a href="https://www.instagram.com/ds_3dprint" class="contact-chip" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="tel:+351911780404" class="contact-chip"><i class="fas fa-phone-alt"></i> Ligar</a>
+            </div>
         </div>
     </div>
 
@@ -127,7 +477,10 @@
     <div class="filters" id="category-filters"></div>
 
     <div class="destaque-section" id="destaque-section" style="display:none;">
-        <h2 style="font-size: 0.8rem; color: var(--gold); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px;">⭐ Em Destaque</h2>
+        <div class="destaque-head">
+            <h2>Em Destaque</h2>
+            <p>Produtos destacados para dar mais visibilidade ao que queres promover.</p>
+        </div>
         <div class="destaque-grid" id="destaque-grid"></div>
     </div>
 
@@ -157,24 +510,49 @@
             { chave: 'jarra', nome: 'Jarras' }
         ];
 
+        async function carregarBanner() {
+            const { data } = await _supabase.from('config_site').select('*').eq('chave', 'banner').single();
+            const ticker = document.getElementById('news-ticker');
+            const track = document.getElementById('news-track');
+
+            if (!data || !data.ativo || !data.valor || !data.valor.trim()) {
+                ticker.classList.add('hidden');
+                track.innerHTML = '';
+                return;
+            }
+
+            const texto = data.valor.trim();
+            track.innerHTML = `
+                <span>${texto}</span>
+                <span>${texto}</span>
+                <span>${texto}</span>
+            `;
+            ticker.classList.remove('hidden');
+        }
+
         async function carregar() {
+            await carregarBanner();
+
             const { data } = await _supabase.from('pecas_portfolio').select('*').order('created_at', { ascending: false });
-            todasAsPecas = data.map(p => {
+            todasAsPecas = (data || []).map(p => {
                 let catAuto = p.categoria && p.categoria !== 'Geral' ? p.categoria : null;
                 const nomeLow = p.nome_peca.toLowerCase();
                 if (!catAuto) {
-                    for (let regra of regrasCategorias) {
-                        if (nomeLow.includes(regra.chave)) { catAuto = regra.nome; break; }
+                    for (const regra of regrasCategorias) {
+                        if (nomeLow.includes(regra.chave)) {
+                            catAuto = regra.nome;
+                            break;
+                        }
                     }
                 }
                 return { ...p, categoria_final: catAuto || 'Outros' };
             });
 
             const categoriasUnicas = [...new Set(todasAsPecas.map(p => p.categoria_final))].sort();
-            const fDiv = document.getElementById('category-filters');
-            fDiv.innerHTML = `<button class="filter-btn active" onclick="setCat('Todas', this)">Todas</button>`;
+            const filtros = document.getElementById('category-filters');
+            filtros.innerHTML = `<button class="filter-btn active" onclick="setCat('Todas', this)">Todas</button>`;
             categoriasUnicas.forEach(cat => {
-                fDiv.innerHTML += `<button class="filter-btn" onclick="setCat('${cat}', this)">${cat}</button>`;
+                filtros.innerHTML += `<button class="filter-btn" onclick="setCat('${cat}', this)">${cat}</button>`;
             });
 
             const emDestaque = todasAsPecas.filter(p => p.destaque);
@@ -182,6 +560,7 @@
                 document.getElementById('destaque-section').style.display = 'block';
                 document.getElementById('destaque-grid').innerHTML = emDestaque.map(p => criarCard(p, 'dest')).join('');
             }
+
             renderizar();
         }
 
@@ -189,14 +568,17 @@
             const termo = document.getElementById('search-input').value.toLowerCase();
             const sort = document.getElementById('sort-select').value;
             const grid = document.getElementById('portfolio-grid');
+
             let filtrados = todasAsPecas.filter(p => {
-                const matchCat = (categoriaAtiva === 'Todas') || (p.categoria_final === categoriaAtiva);
+                const matchCat = categoriaAtiva === 'Todas' || p.categoria_final === categoriaAtiva;
                 const matchSearch = p.nome_peca.toLowerCase().includes(termo);
                 return matchCat && matchSearch;
             });
-            if (sort === 'crescente') filtrados.sort((a,b) => a.preco_sugerido - b.preco_sugerido);
-            else if (sort === 'decrescente') filtrados.sort((a,b) => b.preco_sugerido - a.preco_sugerido);
-            else filtrados.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (sort === 'crescente') filtrados.sort((a, b) => a.preco_sugerido - b.preco_sugerido);
+            else if (sort === 'decrescente') filtrados.sort((a, b) => b.preco_sugerido - a.preco_sugerido);
+            else filtrados.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
             grid.innerHTML = filtrados.map(p => criarCard(p, '')).join('');
         }
 
@@ -204,12 +586,12 @@
             const fotos = p.foto_url.split(',');
             const id = prefix ? `${prefix}-${p.id}` : p.id;
             return `
-                <div class="card ${prefix==='dest'?'card-destaque':''}">
+                <div class="card ${prefix === 'dest' ? 'card-destaque' : ''}">
                     <div class="carousel">
                         <div class="carousel-track" onscroll="updateDots(this, '${id}')">
-                            ${fotos.map(url => `<img src="${url.trim()}" loading="lazy">`).join('')}
+                            ${fotos.map(url => `<img src="${url.trim()}" loading="lazy" alt="${p.nome_peca}">`).join('')}
                         </div>
-                        ${fotos.length > 1 ? `<div class="dots" id="dots-${id}">${fotos.map((_,i) => `<div class="dot ${i===0?'active':''}"></div>`).join('')}</div>` : ''}
+                        ${fotos.length > 1 ? `<div class="dots" id="dots-${id}">${fotos.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div>` : ''}
                     </div>
                     <div class="card-info">
                         <div>
@@ -224,10 +606,10 @@
                 </div>`;
         }
 
-        function setCat(c, btn) {
+        function setCat(categoria, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            categoriaAtiva = c;
+            categoriaAtiva = categoria;
             renderizar();
         }
 
@@ -235,20 +617,24 @@
             const dotsContainer = document.getElementById(`dots-${id}`);
             if (!dotsContainer) return;
             const index = Math.round(track.scrollLeft / track.offsetWidth);
-            const dots = dotsContainer.querySelectorAll('.dot');
-            dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+            dotsContainer.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
         }
 
         function encomendar(nome, id, preco) {
             const qtd = document.getElementById(`qtd-${id}`).value;
-            window.open(`https://wa.me/351911780404?text=Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${(qtd*preco).toFixed(2)}€`, '_blank');
+            const mensagem = `Olá Diogo! Gostaria de encomendar:\n\n🛠️ *Projeto:* ${nome}\n🔢 *Qtd:* ${qtd}\n💰 *Total:* ${(qtd * preco).toFixed(2)}€`;
+            window.open(`https://wa.me/351911780404?text=${encodeURIComponent(mensagem)}`, '_blank');
         }
 
         document.getElementById('search-input').addEventListener('input', renderizar);
         document.getElementById('sort-select').addEventListener('change', renderizar);
 
         carregar();
-        setTimeout(() => { document.getElementById('wa-float').style.display = 'flex'; }, 2000);
+        setTimeout(() => {
+            document.getElementById('wa-float').style.display = 'flex';
+        }, 2000);
     </script>
 </body>
 </html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Catalogo | DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-common.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="hero-admin">
+            <div class="hero-badge">Catalogo</div>
+            <h1>Produtos e Catalogo</h1>
+            <p>Area separada para criar, editar e destacar artigos, sem misturar com stock ou configuracao do site.</p>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <a class="nav-link" href="admin.html">Visao Geral</a>
+        <a class="nav-link active" href="admin-catalogo.html">Catalogo</a>
+        <a class="nav-link" href="admin-site.html">Site</a>
+        <a class="nav-link" href="admin-operacoes.html">Operacoes</a>
+        <a class="nav-link" href="index.html">Ver Site</a>
+    </nav>
+
+    <div id="login-section" class="admin-panel login-box">
+        <div class="card-head">
+            <h2>Acesso</h2>
+        </div>
+        <p class="card-subtitle">Entra com o utilizador autorizado para gerir o catalogo.</p>
+        <label>Utilizador</label>
+        <input type="text" id="user" placeholder="Utilizador">
+        <label>Password</label>
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="adminLogin()" style="margin-top: 14px;">Entrar</button>
+    </div>
+
+    <div id="app-shell" class="admin-panel hidden">
+        <div class="admin-header">
+            <div>
+                <h2>Novo Artigo</h2>
+                <p class="card-subtitle">Cria ou atualiza produtos com fotos, categoria e preco.</p>
+            </div>
+            <button onclick="logout()" class="mini-btn btn-secondary">Sair</button>
+        </div>
+
+        <div class="admin-grid-2">
+            <div class="stack">
+                <div class="admin-card">
+                    <div class="card-head">
+                        <h3>Produto</h3>
+                    </div>
+
+                    <input type="hidden" id="edit-id">
+
+                    <label>Nome</label>
+                    <input type="text" id="nome" placeholder="Ex: Vaso Geometrico" oninput="sugerirCategoria()">
+
+                    <div class="calc-box">
+                        <div class="card-head" style="margin-bottom: 10px;">
+                            <h3 style="font-size: 0.95rem;">Calculadora de Engenharia</h3>
+                        </div>
+                        <div class="calc-grid">
+                            <div>
+                                <label>Tempo (horas)</label>
+                                <input type="number" id="calc-horas" placeholder="0" oninput="calcularPreco()">
+                            </div>
+                            <div>
+                                <label>Peso (gramas)</label>
+                                <input type="number" id="calc-gramas" placeholder="0" oninput="calcularPreco()">
+                            </div>
+                        </div>
+                        <span class="sugestao" id="sugestao-valor">Sugestao: 0.00 EUR</span>
+                    </div>
+
+                    <label>Preco final (EUR)</label>
+                    <input type="number" id="preco_manual" step="0.01" placeholder="0.00">
+
+                    <label>Categoria <span id="cat-sugestao" style="color: var(--gold); margin-left: 8px;"></span></label>
+                    <select id="categoria">
+                        <option value="Geral">Geral</option>
+                    </select>
+
+                    <div class="switch-container">
+                        <span style="font-size: 0.85rem; font-weight: 800;">Limpar fundo com IA</span>
+                        <label class="switch">
+                            <input type="checkbox" id="usar-ia" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-head">
+                        <h3>Galeria</h3>
+                    </div>
+                    <p class="card-subtitle">Podes juntar varias fotos ao mesmo artigo. A primeira sera usada como capa na lista.</p>
+                    <div class="preview-gallery" id="gallery"></div>
+                    <label>Adicionar foto</label>
+                    <input type="file" id="foto-input" accept="image/*">
+                    <button id="btn-add" onclick="adicionarFoto()" class="btn-secondary" style="margin-top: 12px;">Adicionar foto a galeria</button>
+                </div>
+            </div>
+
+            <div class="stack">
+                <div class="admin-card">
+                    <div class="card-head">
+                        <div>
+                            <h3>Publicacao</h3>
+                            <p class="card-subtitle">Grava o artigo no catalogo e atualiza o site.</p>
+                        </div>
+                    </div>
+                    <button id="btn-save" onclick="confirmarSalvar()" class="btn-success">Publicar / Atualizar</button>
+                    <button id="btn-cancel" class="hidden btn-secondary" onclick="location.reload()" style="margin-top: 10px;">Cancelar edicao</button>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-head">
+                        <div>
+                            <h3>Boas praticas</h3>
+                            <p class="card-subtitle">Uma ajuda rapida para manter o catalogo organizado.</p>
+                        </div>
+                    </div>
+                    <div class="field-note">Usa nomes claros, define sempre a categoria e tenta ter pelo menos uma foto limpa por artigo.</div>
+                    <div class="field-note">Se estiveres a atualizar um produto, edita pela lista abaixo para manter a galeria existente.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card" style="margin-top: 18px;">
+            <div class="card-head">
+                <div>
+                    <h3>Gestao do Catalogo</h3>
+                    <p class="card-subtitle">Destaca artigos, edita rapidamente ou remove pecas do portfolio.</p>
+                </div>
+            </div>
+            <div id="lista-pecas" class="list">Carregando...</div>
+        </div>
+    </div>
+
+    <script src="admin-common.js"></script>
+    <script>
+        wireLoginEnter();
+
+        let fotosBlobs = [];
+        let fotosUrlsExistentes = [];
+        let todasAsPecasAdmin = [];
+
+        function safeInline(value) {
+            return String(value || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+        }
+
+        function calcularPreco() {
+            const horas = parseFloat(document.getElementById("calc-horas").value) || 0;
+            const gramas = parseFloat(document.getElementById("calc-gramas").value) || 0;
+            const resultado = (horas * 1.5) + (gramas * 0.05) + 2;
+            document.getElementById("sugestao-valor").innerText = `Sugestao: ${resultado.toFixed(2)} EUR`;
+            document.getElementById("preco_manual").value = resultado.toFixed(2);
+        }
+
+        async function adicionarFoto() {
+            const file = document.getElementById("foto-input").files[0];
+            const usarIA = document.getElementById("usar-ia").checked;
+            if (!file) return alert("Seleciona um ficheiro.");
+
+            const btn = document.getElementById("btn-add");
+            btn.innerText = usarIA ? "Processando IA..." : "A adicionar...";
+            btn.disabled = true;
+
+            try {
+                if (usarIA) {
+                    const formData = new FormData();
+                    formData.append("image_file", file);
+                    const resp = await fetch("https://api.remove.bg/v1.0/removebg", {
+                        method: "POST",
+                        headers: { "X-Api-Key": REMOVE_BG_KEY },
+                        body: formData
+                    });
+                    fotosBlobs.push(await resp.blob());
+                } else {
+                    fotosBlobs.push(file);
+                }
+                atualizarGaleria();
+            } catch (error) {
+                alert("Erro ao processar a foto.");
+            }
+
+            btn.innerText = "Adicionar foto a galeria";
+            btn.disabled = false;
+            document.getElementById("foto-input").value = "";
+        }
+
+        function atualizarGaleria() {
+            const container = document.getElementById("gallery");
+            container.innerHTML = "";
+
+            fotosUrlsExistentes.forEach((url, index) => {
+                container.innerHTML += `<div class="preview-item"><img src="${url}" alt="Foto existente"><button class="remove-photo" onclick="removerExistente(${index})">x</button></div>`;
+            });
+
+            fotosBlobs.forEach((foto, index) => {
+                container.innerHTML += `<div class="preview-item"><img src="${URL.createObjectURL(foto)}" alt="Nova foto"><button class="remove-photo" onclick="removerBlob(${index})">x</button></div>`;
+            });
+        }
+
+        function removerBlob(index) {
+            fotosBlobs.splice(index, 1);
+            atualizarGaleria();
+        }
+
+        function removerExistente(index) {
+            fotosUrlsExistentes.splice(index, 1);
+            atualizarGaleria();
+        }
+
+        function atualizarSelectCategorias() {
+            const categorias = [...new Set(todasAsPecasAdmin
+                .map((peca) => peca.categoria)
+                .filter((categoria) => categoria && categoria !== "Geral"))].sort();
+            const select = document.getElementById("categoria");
+            const atual = select.value;
+            select.innerHTML = '<option value="Geral">Geral</option>';
+            categorias.forEach((categoria) => {
+                select.innerHTML += `<option value="${categoria}">${categoria}</option>`;
+            });
+            if ([...select.options].some((option) => option.value === atual)) {
+                select.value = atual;
+            }
+        }
+
+        function detetarCategoria(nomeNovo) {
+            const palavrasNovo = normalizeKeywords(nomeNovo);
+            if (!palavrasNovo.length) return null;
+
+            const contagem = {};
+            for (const peca of todasAsPecasAdmin) {
+                if (peca.categoria && peca.categoria !== "Geral") {
+                    const palavrasExist = normalizeKeywords(peca.nome_peca);
+                    const comum = palavrasNovo.filter((palavra) => palavrasExist.includes(palavra));
+                    if (comum.length) contagem[peca.categoria] = (contagem[peca.categoria] || 0) + comum.length;
+                }
+            }
+
+            const melhor = Object.entries(contagem).sort((a, b) => b[1] - a[1])[0];
+            return melhor ? melhor[0] : null;
+        }
+
+        function sugerirCategoria() {
+            const nome = document.getElementById("nome").value.trim();
+            const sugestao = detetarCategoria(nome);
+            const select = document.getElementById("categoria");
+            const label = document.getElementById("cat-sugestao");
+
+            if (!sugestao) {
+                label.innerText = "";
+                return;
+            }
+
+            if (![...select.options].some((option) => option.value === sugestao)) {
+                select.innerHTML += `<option value="${sugestao}">${sugestao}</option>`;
+            }
+
+            select.value = sugestao;
+            label.innerText = `Auto: ${sugestao}`;
+        }
+
+        async function confirmarSalvar() {
+            const nome = document.getElementById("nome").value.trim();
+            const preco = document.getElementById("preco_manual").value;
+            const editId = document.getElementById("edit-id").value;
+
+            if (!nome || !preco || (!fotosBlobs.length && !fotosUrlsExistentes.length)) {
+                alert("Dados insuficientes.");
+                return;
+            }
+
+            const btn = document.getElementById("btn-save");
+            btn.disabled = true;
+            btn.innerText = "A guardar...";
+
+            try {
+                const urlsFinais = [...fotosUrlsExistentes];
+                for (const foto of fotosBlobs) {
+                    const name = `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
+                    await adminSupabase.storage.from("fotos_pecas").upload(name, foto);
+                    urlsFinais.push(`${SB_URL}/storage/v1/object/public/fotos_pecas/${name}`);
+                }
+
+                const dados = {
+                    nome_peca: nome,
+                    categoria: document.getElementById("categoria").value,
+                    preco_sugerido: parseFloat(preco).toFixed(2),
+                    foto_url: urlsFinais.join(",")
+                };
+
+                if (editId) {
+                    await adminSupabase.from("pecas_portfolio").update(dados).eq("id", editId);
+                } else {
+                    await adminSupabase.from("pecas_portfolio").insert(dados);
+                }
+
+                location.reload();
+            } catch (error) {
+                alert("Erro ao guardar o artigo.");
+                btn.disabled = false;
+                btn.innerText = "Publicar / Atualizar";
+            }
+        }
+
+        function editarArtigo(id, nome, preco, categoria, urls) {
+            document.getElementById("edit-id").value = id;
+            document.getElementById("nome").value = nome;
+            document.getElementById("preco_manual").value = preco;
+            document.getElementById("categoria").value = categoria || "Geral";
+            document.getElementById("btn-cancel").classList.remove("hidden");
+            fotosUrlsExistentes = urls.split(",").filter(Boolean);
+            fotosBlobs = [];
+            atualizarGaleria();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        async function apagar(id) {
+            if (!confirm("Eliminar artigo?")) return;
+            await adminSupabase.from("pecas_portfolio").delete().eq("id", id);
+            await carregarLista();
+        }
+
+        async function toggleDestaque(id, estadoAtual) {
+            await adminSupabase.from("pecas_portfolio").update({ destaque: !estadoAtual }).eq("id", id);
+            await carregarLista();
+        }
+
+        async function carregarLista() {
+            const { data } = await adminSupabase
+                .from("pecas_portfolio")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            todasAsPecasAdmin = data || [];
+            atualizarSelectCategorias();
+
+            document.getElementById("lista-pecas").innerHTML = todasAsPecasAdmin.map((peca) => `
+                <div class="item-admin">
+                    <img src="${firstImage(peca.foto_url)}" alt="${peca.nome_peca}">
+                    <div>
+                        <strong>${peca.nome_peca}</strong>
+                        <div class="item-meta">${formatEuro(peca.preco_sugerido)} | ${peca.categoria || "Geral"}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="mini-btn ${peca.destaque ? "btn-destaque-on" : "btn-destaque-off"}" onclick="toggleDestaque('${peca.id}', ${peca.destaque ? "true" : "false"})">${peca.destaque ? "Em destaque" : "Destacar"}</button>
+                        <button class="mini-btn btn-edit" onclick="editarArtigo('${peca.id}', '${safeInline(peca.nome_peca)}', '${peca.preco_sugerido}', '${safeInline(peca.categoria || "Geral")}', '${safeInline(peca.foto_url || "")}')">Editar</button>
+                        <button class="mini-btn btn-del" onclick="apagar('${peca.id}')">Eliminar</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        setupAdminPage(carregarLista);
+    </script>
+</body>
+</html>

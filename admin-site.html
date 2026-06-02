@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Site | DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-common.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="hero-admin">
+            <div class="hero-badge">Configuracao</div>
+            <h1>Site e Banner</h1>
+            <p>Area separada para as mensagens do site principal, sem mistura com catalogo ou stock.</p>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <a class="nav-link" href="admin.html">Visao Geral</a>
+        <a class="nav-link" href="admin-catalogo.html">Catalogo</a>
+        <a class="nav-link active" href="admin-site.html">Site</a>
+        <a class="nav-link" href="admin-operacoes.html">Operacoes</a>
+        <a class="nav-link" href="index.html">Ver Site</a>
+    </nav>
+
+    <div id="login-section" class="admin-panel login-box">
+        <div class="card-head">
+            <h2>Acesso</h2>
+        </div>
+        <p class="card-subtitle">Entra com o utilizador autorizado para gerir o conteudo do site.</p>
+        <label>Utilizador</label>
+        <input type="text" id="user" placeholder="Utilizador">
+        <label>Password</label>
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="adminLogin()" style="margin-top: 14px;">Entrar</button>
+    </div>
+
+    <div id="app-shell" class="admin-panel hidden">
+        <div class="admin-header">
+            <div>
+                <h2>Site</h2>
+                <p class="card-subtitle">Controla o banner e valida a mensagem que vai aparecer no topo do site.</p>
+            </div>
+            <button onclick="logout()" class="mini-btn btn-secondary">Sair</button>
+        </div>
+
+        <div class="admin-grid-2">
+            <div class="admin-card">
+                <div class="card-head">
+                    <div>
+                        <h3>Banner de Noticias</h3>
+                        <p class="card-subtitle">Escreve a frase promocional ou o aviso que queres mostrar no topo.</p>
+                    </div>
+                </div>
+
+                <div class="switch-container">
+                    <span style="font-size: 0.85rem; font-weight: 800;">Banner ativo no site</span>
+                    <label class="switch">
+                        <input type="checkbox" id="banner-ativo">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <label>Texto do banner</label>
+                <input type="text" id="banner-texto" placeholder="Ex: Promocao especial 5% desconto - contacta-nos para saber mais.">
+                <span class="helper-text">Frases curtas funcionam melhor. O objetivo e ser lido rapidamente no topo do site.</span>
+                <small id="banner-status" class="status"></small>
+
+                <button onclick="guardarBanner()" class="btn-success" style="margin-top: 16px;">Guardar configuracao</button>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-head">
+                    <div>
+                        <h3>Pre-visualizacao</h3>
+                        <p class="card-subtitle">Simulacao direta do ticker de noticias antes de publicares.</p>
+                    </div>
+                </div>
+                <div class="banner-preview">
+                    <div class="banner-preview-head">Preview</div>
+                    <div id="banner-preview-content">
+                        <div class="preview-placeholder">Escreve um texto para veres aqui a simulacao.</div>
+                    </div>
+                </div>
+                <div class="field-note" style="margin-top: 16px;">
+                    Dica: usa novidades, promocoes, avisos de entrega ou chamadas para contacto.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-common.js"></script>
+    <script>
+        wireLoginEnter();
+
+        function renderBannerPreview() {
+            const texto = document.getElementById("banner-texto").value.trim();
+            const ativo = document.getElementById("banner-ativo").checked;
+            const preview = document.getElementById("banner-preview-content");
+
+            if (!texto) {
+                preview.innerHTML = '<div class="preview-placeholder">Escreve um texto para veres aqui a simulacao.</div>';
+                return;
+            }
+
+            preview.innerHTML = `
+                <div class="banner-preview-marquee" style="${!ativo ? "opacity: 0.5;" : ""}">
+                    <div class="banner-preview-track">
+                        <span>${texto}</span>
+                        <span>${texto}</span>
+                        <span>${texto}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function guardarBanner() {
+            const ativo = document.getElementById("banner-ativo").checked;
+            const texto = document.getElementById("banner-texto").value.trim();
+            const status = document.getElementById("banner-status");
+            const { error } = await saveBannerState(ativo, texto);
+            status.className = `status ${error ? "error" : "ok"}`;
+            status.innerText = error ? "Erro ao guardar o banner." : "Banner guardado com sucesso.";
+        }
+
+        async function loadSitePage() {
+            const data = await loadBannerState();
+            if (data) {
+                document.getElementById("banner-ativo").checked = Boolean(data.ativo);
+                document.getElementById("banner-texto").value = data.valor || "";
+            }
+
+            renderBannerPreview();
+
+            document.getElementById("banner-ativo").addEventListener("change", renderBannerPreview);
+            document.getElementById("banner-texto").addEventListener("input", renderBannerPreview);
+        }
+
+        setupAdminPage(loadSitePage);
+    </script>
+</body>
+</html>
