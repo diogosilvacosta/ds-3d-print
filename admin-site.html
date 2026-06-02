@@ -66,7 +66,59 @@
                 <label>Texto do banner</label>
                 <input type="text" id="banner-texto" placeholder="Ex: Promocao especial 5% desconto - contacta-nos para saber mais.">
                 <span class="helper-text">Frases curtas funcionam melhor. O objetivo e ser lido rapidamente no topo do site.</span>
-                <small id="banner-status" class="status"></small>
+
+                <div class="admin-grid-2" style="margin-top: 16px; gap: 12px;">
+                    <div>
+                        <label>Velocidade</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-turtle" style="font-size:0.7rem; color:var(--muted);"></i>
+                            <input type="range" id="banner-velocidade" min="5" max="40" value="18" style="flex:1; padding:0; background:transparent; border:none; accent-color:var(--red);">
+                            <i class="fas fa-bolt" style="font-size:0.7rem; color:var(--muted);"></i>
+                        </div>
+                        <span class="helper-text">Arrasta: lento &larr; &rarr; rapido</span>
+                    </div>
+                    <div>
+                        <label>Tamanho da letra</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:0.6rem; color:var(--muted);">A</span>
+                            <input type="range" id="banner-tamanho" min="10" max="24" value="14" style="flex:1; padding:0; background:transparent; border:none; accent-color:var(--red);">
+                            <span style="font-size:1rem; color:var(--muted); font-weight:900;">A</span>
+                        </div>
+                        <span class="helper-text" id="banner-tamanho-val">14px</span>
+                    </div>
+                </div>
+
+                <div class="admin-grid-2" style="margin-top: 12px; gap: 12px;">
+                    <div>
+                        <label>Tipo de letra</label>
+                        <select id="banner-fonte" style="width:100%;">
+                            <option value="'DM Sans', sans-serif">DM Sans</option>
+                            <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="Georgia, serif">Georgia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Cor do texto</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input type="color" id="banner-cor-texto" value="#ffffff" style="width:44px; height:38px; padding:2px; border:1px solid var(--line); border-radius:8px; background:#0b0b0b; cursor:pointer;">
+                            <span class="helper-text" id="banner-cor-texto-val">#ffffff</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 12px;">
+                    <label>Cor de fundo do banner</label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="color" id="banner-cor-fundo" value="#e8352a" style="width:44px; height:38px; padding:2px; border:1px solid var(--line); border-radius:8px; background:#0b0b0b; cursor:pointer;">
+                        <span class="helper-text" id="banner-cor-fundo-val">#e8352a</span>
+                    </div>
+                </div>
+
+                <small id="banner-status" class="status" style="margin-top:10px;"></small>
 
                 <button onclick="guardarBanner()" class="btn-success" style="margin-top: 16px;">Guardar configuracao</button>
             </div>
@@ -95,22 +147,34 @@
     <script>
         wireLoginEnter();
 
+        function getBannerSettings() {
+            return {
+                texto: document.getElementById("banner-texto").value.trim(),
+                velocidade: parseInt(document.getElementById("banner-velocidade").value),
+                tamanho: parseInt(document.getElementById("banner-tamanho").value),
+                fonte: document.getElementById("banner-fonte").value,
+                corTexto: document.getElementById("banner-cor-texto").value,
+                corFundo: document.getElementById("banner-cor-fundo").value
+            };
+        }
+
         function renderBannerPreview() {
-            const texto = document.getElementById("banner-texto").value.trim();
+            const s = getBannerSettings();
             const ativo = document.getElementById("banner-ativo").checked;
             const preview = document.getElementById("banner-preview-content");
 
-            if (!texto) {
+            if (!s.texto) {
                 preview.innerHTML = '<div class="preview-placeholder">Escreve um texto para veres aqui a simulacao.</div>';
                 return;
             }
 
+            const opacity = !ativo ? "opacity: 0.5;" : "";
             preview.innerHTML = `
-                <div class="banner-preview-marquee" style="${!ativo ? "opacity: 0.5;" : ""}">
-                    <div class="banner-preview-track">
-                        <span>${texto}</span>
-                        <span>${texto}</span>
-                        <span>${texto}</span>
+                <div class="banner-preview-marquee" style="${opacity} background:${s.corFundo};">
+                    <div class="banner-preview-track" style="animation-duration:${s.velocidade}s; font-family:${s.fonte}; font-size:${s.tamanho}px; color:${s.corTexto};">
+                        <span>${s.texto}</span>
+                        <span>${s.texto}</span>
+                        <span>${s.texto}</span>
                     </div>
                 </div>
             `;
@@ -118,24 +182,79 @@
 
         async function guardarBanner() {
             const ativo = document.getElementById("banner-ativo").checked;
-            const texto = document.getElementById("banner-texto").value.trim();
+            const settings = getBannerSettings();
             const status = document.getElementById("banner-status");
-            const { error } = await saveBannerState(ativo, texto);
-            status.className = `status ${error ? "error" : "ok"}`;
-            status.innerText = error ? "Erro ao guardar o banner." : "Banner guardado com sucesso.";
+
+            if (!settings.texto) {
+                status.className = "status error";
+                status.innerText = "Escreve um texto para o banner.";
+                return;
+            }
+
+            const payload = JSON.stringify(settings);
+            const { data: existing } = await adminSupabase
+                .from("config_site")
+                .select("chave")
+                .eq("chave", CHAVE_BANNER)
+                .maybeSingle();
+
+            let result;
+            if (existing) {
+                result = await saveBannerState(ativo, payload);
+            } else {
+                result = await insertBannerState(ativo, payload);
+            }
+
+            status.className = `status ${result.error ? "error" : "ok"}`;
+            status.innerText = result.error ? "Erro ao guardar o banner." : "Banner guardado com sucesso.";
+        }
+
+        function applySettings(data) {
+            if (!data) return;
+
+            let settings;
+            try {
+                settings = JSON.parse(data.valor);
+            } catch (e) {
+                settings = { texto: data.valor || "" };
+            }
+
+            const defaults = { velocidade: 18, tamanho: 14, fonte: "'DM Sans', sans-serif", corTexto: "#ffffff", corFundo: "#e8352a" };
+            const s = Object.assign({}, defaults, settings);
+
+            document.getElementById("banner-ativo").checked = Boolean(data.ativo);
+            document.getElementById("banner-texto").value = s.texto || "";
+            document.getElementById("banner-velocidade").value = s.velocidade;
+            document.getElementById("banner-tamanho").value = s.tamanho;
+            document.getElementById("banner-tamanho-val").textContent = s.tamanho + "px";
+            document.getElementById("banner-fonte").value = s.fonte;
+            document.getElementById("banner-cor-texto").value = s.corTexto;
+            document.getElementById("banner-cor-texto-val").textContent = s.corTexto;
+            document.getElementById("banner-cor-fundo").value = s.corFundo;
+            document.getElementById("banner-cor-fundo-val").textContent = s.corFundo;
         }
 
         async function loadSitePage() {
             const data = await loadBannerState();
-            if (data) {
-                document.getElementById("banner-ativo").checked = Boolean(data.ativo);
-                document.getElementById("banner-texto").value = data.valor || "";
-            }
-
+            applySettings(data);
             renderBannerPreview();
 
             document.getElementById("banner-ativo").addEventListener("change", renderBannerPreview);
             document.getElementById("banner-texto").addEventListener("input", renderBannerPreview);
+            document.getElementById("banner-velocidade").addEventListener("input", renderBannerPreview);
+            document.getElementById("banner-tamanho").addEventListener("input", function() {
+                document.getElementById("banner-tamanho-val").textContent = this.value + "px";
+                renderBannerPreview();
+            });
+            document.getElementById("banner-fonte").addEventListener("change", renderBannerPreview);
+            document.getElementById("banner-cor-texto").addEventListener("input", function() {
+                document.getElementById("banner-cor-texto-val").textContent = this.value;
+                renderBannerPreview();
+            });
+            document.getElementById("banner-cor-fundo").addEventListener("input", function() {
+                document.getElementById("banner-cor-fundo-val").textContent = this.value;
+                renderBannerPreview();
+            });
         }
 
         setupAdminPage(loadSitePage);

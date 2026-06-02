@@ -626,13 +626,23 @@ let catAtiva = 'Todas';
 async function loadBanner() {
     const { data } = await _supabase.from('config_site').select('*').eq('chave','banner').single();
     if (data && data.ativo && data.valor) {
+        let s;
+        try { s = JSON.parse(data.valor); } catch(e) { s = { texto: data.valor }; }
+
+        const defaults = { velocidade: 18, tamanho: 14, fonte: "'DM Sans', sans-serif", corTexto: "#ffffff", corFundo: "#e8352a" };
+        const cfg = Object.assign({}, defaults, s);
+        const txt = cfg.texto || s;
+
         const b = document.getElementById('site-banner');
         b.style.display = 'block';
-        const t = data.valor;
+        b.style.background = cfg.corFundo;
+        b.style.fontFamily = cfg.fonte;
+        b.style.fontSize = cfg.tamanho + 'px';
+        b.style.color = cfg.corTexto;
         b.innerHTML = `
-            <div class="banner-track">
-                <span>${t}</span><span>${t}</span><span>${t}</span>
-                <span>${t}</span><span>${t}</span><span>${t}</span>
+            <div class="banner-track" style="animation-duration:${cfg.velocidade}s;">
+                <span>${txt}</span><span>${txt}</span><span>${txt}</span>
+                <span>${txt}</span><span>${txt}</span><span>${txt}</span>
             </div>`;
     }
 }

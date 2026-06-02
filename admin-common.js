@@ -102,7 +102,14 @@ async function loadBannerState() {
 async function saveBannerState(ativo, valor) {
     return adminSupabase
         .from("config_site")
-        .upsert({ chave: CHAVE_BANNER, ativo, valor }, { onConflict: "chave" });
+        .update({ ativo, valor })
+        .eq("chave", CHAVE_BANNER);
+}
+
+async function insertBannerState(ativo, valor) {
+    return adminSupabase
+        .from("config_site")
+        .insert({ chave: CHAVE_BANNER, ativo, valor });
 }
 
 function firstImage(urls) {
