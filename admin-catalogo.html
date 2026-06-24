@@ -271,8 +271,14 @@
             const preco = document.getElementById("preco_manual").value;
             const editId = document.getElementById("edit-id").value;
 
+            console.log("[DEBUG] nome:", nome);
+            console.log("[DEBUG] preco:", preco);
+            console.log("[DEBUG] editId:", editId);
+            console.log("[DEBUG] fotosBlobs:", fotosBlobs.length);
+            console.log("[DEBUG] fotosUrlsExistentes:", fotosUrlsExistentes);
+
             if (!nome || !preco || (!fotosBlobs.length && !fotosUrlsExistentes.length)) {
-                alert("Dados insuficientes.");
+                alert(`Dados insuficientes.\n\nnome: "${nome}"\npreco: "${preco}"\nfotos novas: ${fotosBlobs.length}\nfotos existentes: ${fotosUrlsExistentes.length}`);
                 return;
             }
 
@@ -291,14 +297,26 @@
                 const dados = {
                     nome_peca: nome,
                     categoria: document.getElementById("categoria").value,
-                    preco_sugerido: parseFloat(preco).toFixed(2),
+                    preco_sugerido: parseFloat(preco),
                     foto_url: urlsFinais.join(",")
                 };
 
                 if (editId) {
-                    await adminSupabase.from("pecas_portfolio").update(dados).eq("id", editId);
+                    const { error: updateError } = await adminSupabase.from("pecas_portfolio").update(dados).eq("id", editId);
+                    if (updateError) {
+                        alert("Erro ao atualizar: " + updateError.message);
+                        btn.disabled = false;
+                        btn.innerText = "Publicar / Atualizar";
+                        return;
+                    }
                 } else {
-                    await adminSupabase.from("pecas_portfolio").insert(dados);
+                    const { error: insertError } = await adminSupabase.from("pecas_portfolio").insert(dados);
+                    if (insertError) {
+                        alert("Erro ao inserir: " + insertError.message);
+                        btn.disabled = false;
+                        btn.innerText = "Publicar / Atualizar";
+                        return;
+                    }
                 }
 
                 location.reload();

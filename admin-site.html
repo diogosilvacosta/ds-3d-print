@@ -192,18 +192,7 @@
             }
 
             const payload = JSON.stringify(settings);
-            const { data: existing } = await adminSupabase
-                .from("config_site")
-                .select("chave")
-                .eq("chave", CHAVE_BANNER)
-                .maybeSingle();
-
-            let result;
-            if (existing) {
-                result = await saveBannerState(ativo, payload);
-            } else {
-                result = await insertBannerState(ativo, payload);
-            }
+            const result = await upsertBannerState(ativo, payload);
 
             status.className = `status ${result.error ? "error" : "ok"}`;
             status.innerText = result.error ? "Erro ao guardar o banner." : "Banner guardado com sucesso.";
