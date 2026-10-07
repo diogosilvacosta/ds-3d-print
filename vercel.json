@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/ver/:codigo([a-z0-9]{6,16})", "destination": "/ver/index.html" },
+    { "source": "/ver/:codigo([a-z0-9]{6,16})/", "destination": "/ver/index.html" }
+  ],
+  "headers": [
+    { "source": "/ver/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+  ]
+}

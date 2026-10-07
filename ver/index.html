@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pré-visualização 3D · DS 3D PRINT</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#080808">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+:root{
+  --bg:#080808; --panel:#111111; --line:#242424; --text:#f0f0f0; --muted:#8a8a8a;
+  --accent:#e8352a; --accent-ink:#ffffff;
+  --display:'Bebas Neue',Impact,sans-serif; --body:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{min-height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);letter-spacing:.06em;font-size:22px;color:var(--text);text-decoration:none}
+.brand img{width:44px;height:auto}
+.brand b{color:var(--accent);font-weight:400}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 9px;border-radius:99px;white-space:nowrap}
+main{flex:1;display:flex;flex-direction:column;max-width:960px;width:100%;margin:0 auto;padding:16px}
+h1{font-family:var(--display);font-size:34px;font-weight:400;letter-spacing:.03em;line-height:1.05;margin-bottom:4px;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin-bottom:14px;line-height:1.5}
+.stage{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#232327 0%,#121214 70%);border:1px solid var(--line)}
+model-viewer{width:100%;height:min(62dvh,560px);--poster-color:transparent;--progress-bar-color:var(--accent)}
+.ar-btn{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;
+  background:var(--accent);color:var(--accent-ink);border:0;border-radius:99px;padding:14px 22px;font:600 16px var(--body);box-shadow:0 8px 30px rgba(232,53,42,.4);cursor:pointer;white-space:nowrap}
+.ar-btn svg{width:22px;height:22px}
+.no-ar{position:absolute;left:12px;right:12px;bottom:14px;text-align:center;font-size:13px;color:var(--muted);background:rgba(0,0,0,.6);padding:10px;border-radius:12px}
+.watermark{position:absolute;top:12px;left:14px;font:400 13px var(--display);letter-spacing:.12em;color:rgba(255,255,255,.28);pointer-events:none}
+.dim{display:none;pointer-events:none;background:rgba(8,8,8,.85);color:var(--text);border:1px solid var(--accent);border-radius:8px;padding:3px 7px;font:600 12px var(--body);white-space:nowrap}
+.show-dims .dim{display:block}
+.dot{display:none}
+#dimLines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}
+.show-dims #dimLines{display:block}
+#dimLines line{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.controls{display:grid;gap:14px;margin-top:16px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:100%}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px 14px;border-radius:99px;font:500 14px var(--body);cursor:pointer;display:flex;gap:8px;align-items:center}
+.chip[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.chip.static{cursor:default}
+.chip:focus-visible,.cta:focus-visible,.ar-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sw{width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.25)}
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.spec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.spec small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.spec strong{font:400 26px var(--display);letter-spacing:.03em;font-variant-numeric:tabular-nums}
+.cta{display:flex;justify-content:center;align-items:center;gap:8px;text-decoration:none;background:transparent;color:var(--accent);border:1.5px solid var(--accent);border-radius:14px;padding:14px;font:600 16px var(--body)}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+.msg{margin:auto;max-width:440px;text-align:center;display:grid;gap:14px;padding:40px 0}
+.msg h1{font-size:40px}
+footer{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;color:var(--muted)}
+[hidden]{display:none!important}
+@media (min-width:760px){ .controls{grid-template-columns:1fr 1fr} .controls .full{grid-column:1/-1} }
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto} }
+</style>
+</head>
+<body oncontextmenu="return false">
+<header>
+  <a class="brand" href="https://ds3dprint.com" target="_blank" rel="noopener"><img src="/ver/logo-dark.png" alt="" draggable="false">DS <b>3D</b> PRINT</a>
+  <span class="tag">Pré-visualização privada</span>
+</header>
+
+<main id="loading"><div class="msg"><p class="sub">A preparar a tua peça…</p></div></main>
+
+<main id="erro" hidden>
+  <div class="msg">
+    <h1 id="erroTitulo">Este link expirou</h1>
+    <p class="sub" id="erroTexto">Esta pré-visualização já não está disponível. Fala connosco e enviamos-te um link novo.</p>
+    <a class="cta" id="erroCta" target="_blank" rel="noopener">Falar com a DS 3D PRINT</a>
+  </div>
+</main>
+
+<main id="app" hidden>
+  <h1 id="title"></h1>
+  <p class="sub">Roda com o dedo para ver todos os lados. Carrega em <b>Ver no meu espaço</b> para a pores à tua frente, em tamanho real.</p>
+
+  <div class="stage" id="stage">
+    <model-viewer id="mv"
+      alt="Pré-visualização 3D da peça"
+      camera-controls touch-action="pan-y" interaction-prompt="auto"
+      ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
+      shadow-intensity="1.15" shadow-softness="0.65" exposure="1.05"
+      environment-image="neutral" tone-mapping="neutral"
+      camera-orbit="-20deg 72deg auto" disable-pan>
+      <button slot="ar-button" class="ar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>
+        Ver no meu espaço
+      </button>
+      <div class="no-ar" id="noAr" hidden>Para ver em realidade aumentada abre este link no telemóvel (iPhone ou Android).</div>
+      <div slot="hotspot-lX" class="dim" data-position="0 0 0"></div>
+      <div slot="hotspot-lY" class="dim" data-position="0 0 0"></div>
+      <div slot="hotspot-lZ" class="dim" data-position="0 0 0"></div>
+      <svg id="dimLines" xmlns="http://www.w3.org/2000/svg"><line/><line/><line/></svg>
+      <div class="watermark">DS 3D PRINT · PRÉ-VISUALIZAÇÃO</div>
+    </model-viewer>
+  </div>
+
+  <section class="controls">
+    <div class="full">
+      <div class="specs">
+        <div class="spec"><small>Largura</small><strong id="sL">—</strong></div>
+        <div class="spec"><small>Altura</small><strong id="sA">—</strong></div>
+        <div class="spec"><small>Profundidade</small><strong id="sP">—</strong></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label" id="coresLabel">Cor do filamento</span>
+      <div class="row" id="colors"></div>
+    </div>
+
+    <div class="row">
+      <span class="label">Ver</span>
+      <button class="chip" id="dimsBtn" aria-pressed="false">Mostrar medidas</button>
+      <button class="chip" id="spinBtn" aria-pressed="false">Rodar sozinho</button>
+    </div>
+
+    <a class="cta full" id="cta" target="_blank" rel="noopener">Gostei, quero encomendar</a>
+    <p class="note full">A peça aparece em tamanho real e não pode ser aumentada nem encolhida. A precisão da realidade aumentada depende do telemóvel (normalmente poucos milímetros); as medidas exatas são as indicadas acima. As cores no ecrã são aproximadas. Este modelo é apenas uma pré-visualização: a versão de impressão fica com a DS 3D PRINT.</p>
+  </section>
+</main>
+<footer>© DS 3D PRINT · Vila Nova de Famalicão</footer>
+
+<script type="module">
+const SB_URL = 'https://wxwdvixxcrduzneqjfwo.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM';
+const WHATSAPP = '351911780404';
+const FILAMENTOS = [
+  { nome:'Branco',  hex:'#eeeeea' }, { nome:'Preto', hex:'#1d1d1f' }, { nome:'Cinza', hex:'#8a8a8d' },
+  { nome:'Vermelho',hex:'#c8231c' }, { nome:'Azul', hex:'#1f3f9a' }, { nome:'Madeira', hex:'#b07f4f', rough:0.75 },
+  { nome:'Dourado', hex:'#c9a14a', metal:0.55, rough:0.38 },
+];
+const $ = (id) => document.getElementById(id);
+const sb = (path, body) => fetch(SB_URL + path, { method:'POST', headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+const waLink = (txt) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}`;
+
+function showError(titulo, texto) {
+  $('loading').hidden = true; $('app').hidden = true; $('erro').hidden = false;
+  $('erroTitulo').textContent = titulo; $('erroTexto').textContent = texto;
+  $('erroCta').href = waLink('Olá DS 3D PRINT! Abri uma pré-visualização que já não está disponível. Podem enviar-me um link novo?');
+}
+
+async function loadData() {
+  if (window.PREVIEW_STATIC) return window.PREVIEW_STATIC;   // páginas antigas com o modelo ao lado
+  const codigo = (new URLSearchParams(location.search).get('c') || location.pathname.split('/').filter(Boolean)[1] || '').toLowerCase();
+  if (!/^[a-z0-9]{6,16}$/.test(codigo)) return { estado:'inexistente' };
+  const r = await sb('/rest/v1/rpc/ver_previsualizacao', { p_codigo: codigo });
+  if (!r.ok) return { estado:'erro' };
+  const d = await r.json();
+  if (!d || d.estado !== 'ok') return d || { estado:'inexistente' };
+  const s = await sb('/storage/v1/object/sign/previsualizacoes/' + d.ficheiro_path.split('/').map(encodeURIComponent).join('/'), { expiresIn: 3600 });
+  if (!s.ok) return { estado:'erro' };
+  const sj = await s.json();
+  d.glbUrl = SB_URL + '/storage/v1' + (sj.signedURL || sj.signedUrl);
+  d.codigo = codigo;
+  return d;
+}
+
+const hex2lin = h => { const n=parseInt(h.slice(1),16); return [n>>16,(n>>8)&255,n&255].map(c=>{c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)}); };
+const fmt = m => Math.round(m) + ' mm';
+
+let data;
+try { data = await loadData(); } catch { data = { estado:'erro' }; }
+if (data.estado === 'expirado') showError('Este link expirou', 'Esta pré-visualização já não está disponível. Fala connosco e enviamos-te um link novo.');
+else if (data.estado !== 'ok') showError(data.estado === 'erro' ? 'Não foi possível abrir' : 'Link não encontrado',
+  data.estado === 'erro' ? 'Verifica a ligação à internet e volta a abrir o link.' : 'Confirma que o link está completo, ou fala connosco.');
+else start(data);
+
+function start(d) {
+  const mv = $('mv');
+  document.title = d.titulo + ' · DS 3D PRINT';
+  $('title').textContent = d.titulo;
+  $('loading').hidden = true; $('app').hidden = false;
+  mv.setAttribute('src', d.glbUrl);
+
+  const cta = $('cta');
+  cta.href = waLink(`Olá DS 3D PRINT! Vi a pré-visualização "${d.titulo}"${d.codigo ? ` (ref. ${d.codigo})` : ''} e quero avançar com a encomenda.`);
+  cta.addEventListener('click', () => { if (d.codigo && !window.PREVIEW_STATIC) sb('/rest/v1/rpc/registar_encomenda', { p_codigo: d.codigo }).catch(() => {}); });
+
+  // medidas (do registo; confirmadas com o modelo)
+  $('sL').textContent = fmt(d.largura_mm); $('sA').textContent = fmt(d.altura_mm); $('sP').textContent = fmt(d.profundidade_mm);
+
+  // cores
+  const box = $('colors');
+  if (d.multicor) {
+    $('coresLabel').textContent = 'Cores da peça';
+    (d.cores || []).forEach(h => { const c=document.createElement('span'); c.className='chip static'; c.innerHTML=`<span class="sw" style="background:${h}"></span>`; c.setAttribute('aria-label', 'Cor ' + h); box.appendChild(c); });
+  } else {
+    FILAMENTOS.forEach((c, i) => {
+      const b=document.createElement('button'); b.className='chip'; b.setAttribute('aria-pressed','false');
+      b.innerHTML=`<span class="sw" style="background:${c.hex}"></span>${c.nome}`; b.onclick=()=>applyColor(i); box.appendChild(b);
+    });
+  }
+  function applyColor(i){
+    const c=FILAMENTOS[i];
+    for (const m of mv.model?.materials || []) {
+      m.pbrMetallicRoughness.setBaseColorFactor([...hex2lin(c.hex),1]);
+      m.pbrMetallicRoughness.setMetallicFactor(c.metal ?? 0);
+      m.pbrMetallicRoughness.setRoughnessFactor(c.rough ?? 0.62);
+    }
+    [...box.children].forEach((b,j)=>b.setAttribute('aria-pressed', j===i));
+  }
+
+  // cotas
+  const lines=[...document.querySelectorAll('#dimLines line')];
+  const ends=['xA','xB','yA','yB','zA','zB'];
+  ends.forEach(k=>{ const el=document.createElement('div'); el.slot='hotspot-c'+k; el.className='dot'; el.dataset.position='0 0 0'; mv.appendChild(el); });
+  let ready=false;
+  mv.addEventListener('load', () => {
+    if (!d.multicor) { const def = FILAMENTOS.findIndex(f => f.nome === (d.cor_inicial || 'Branco')); applyColor(def < 0 ? 0 : def); }
+    const c=mv.getBoundingBoxCenter(), s=mv.getDimensions();
+    const x0=c.x-s.x/2,x1=c.x+s.x/2,y0=c.y-s.y/2,y1=c.y+s.y/2,z0=c.z-s.z/2,z1=c.z+s.z/2,g=0.01;
+    const P=(n,x,y,z)=>mv.updateHotspot({name:n,position:`${x} ${y} ${z}`});
+    P('hotspot-lX',c.x,y0-0.012,z1+g); P('hotspot-lY',x1+g+0.012,c.y,z1); P('hotspot-lZ',x1+g+0.012,y0,c.z);
+    P('hotspot-cxA',x0,y0,z1+g); P('hotspot-cxB',x1,y0,z1+g);
+    P('hotspot-cyA',x1+g,y0,z1); P('hotspot-cyB',x1+g,y1,z1);
+    P('hotspot-czA',x1+g,y0,z1); P('hotspot-czB',x1+g,y0,z0);
+    mv.querySelector('[slot=hotspot-lX]').textContent=$('sL').textContent;
+    mv.querySelector('[slot=hotspot-lY]').textContent=$('sA').textContent;
+    mv.querySelector('[slot=hotspot-lZ]').textContent=$('sP').textContent;
+    ready=true;
+  });
+  const draw=(line,a,b)=>{ if(!a||!b){line.setAttribute('visibility','hidden');return;} line.setAttribute('visibility','visible');
+    line.setAttribute('x1',a.canvasPosition.x);line.setAttribute('y1',a.canvasPosition.y);line.setAttribute('x2',b.canvasPosition.x);line.setAttribute('y2',b.canvasPosition.y); };
+  (function loop(){ if(ready && $('stage').classList.contains('show-dims')){ const q=k=>mv.queryHotspot('hotspot-c'+k);
+    draw(lines[0],q('xA'),q('xB')); draw(lines[1],q('yA'),q('yB')); draw(lines[2],q('zA'),q('zB')); } requestAnimationFrame(loop); })();
+
+  $('dimsBtn').onclick=()=>{ const on=$('stage').classList.toggle('show-dims'); $('dimsBtn').setAttribute('aria-pressed',on); };
+  $('spinBtn').onclick=()=>{ const on=!mv.hasAttribute('auto-rotate'); mv.toggleAttribute('auto-rotate',on); $('spinBtn').setAttribute('aria-pressed',on); };
+  setTimeout(()=>{ if(!mv.canActivateAR) $('noAr').hidden=false; }, 1500);
+}
+</script>
+</body>
+</html>
