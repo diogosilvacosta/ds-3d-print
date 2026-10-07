@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cut">
+<title>Pré-visualização 3D · DS 3D PRINT</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#080808">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+:root{
+  --bg:#080808; --panel:#111111; --line:#242424; --text:#f0f0f0; --muted:#8a8a8a;
+  --accent:#e8352a; --accent-ink:#ffffff;
+  --display:'Bebas Neue',Impact,sans-serif; --body:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{min-height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);letter-spacing:.06em;font-size:22px;color:var(--text);text-decoration:none}
+.brand img{width:44px;height:auto}
+.brand b{color:var(--accent);font-weight:400}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 9px;border-radius:99px}
+main{flex:1;display:flex;flex-direction:column;max-width:960px;width:100%;margin:0 auto;padding:16px}
+h1{font-family:var(--display);font-size:34px;font-weight:400;letter-spacing:.03em;line-height:1.05;margin-bottom:4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:14px}
+.stage{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#232327 0%,#121214 70%);border:1px solid var(--line)}
+model-viewer{width:100%;height:min(62dvh,560px);--poster-color:transparent;--progress-bar-color:var(--accent)}
+.ar-btn{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;
+  background:var(--accent);color:var(--accent-ink);border:0;border-radius:99px;padding:14px 22px;font:600 16px var(--body);box-shadow:0 8px 30px rgba(232,53,42,.4);cursor:pointer;white-space:nowrap}
+.ar-btn svg{width:22px;height:22px}
+.no-ar{position:absolute;left:12px;right:12px;bottom:14px;text-align:center;font-size:13px;color:var(--muted);background:rgba(0,0,0,.55);padding:10px;border-radius:12px;display:none}
+model-viewer:not([ar-status]) .no-ar{display:none}
+.watermark{position:absolute;top:12px;left:14px;font:400 13px var(--display);letter-spacing:.12em;color:rgba(255,255,255,.28);pointer-events:none}
+/* medidas */
+.dim{display:none;pointer-events:none;background:rgba(11,11,12,.85);color:var(--text);border:1px solid var(--accent);border-radius:8px;padding:3px 7px;font:600 12px var(--body);white-space:nowrap}
+.show-dims .dim{display:block}
+.dot{display:none}
+#dimLines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}
+.show-dims #dimLines{display:block}
+#dimLines line{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.controls{display:grid;gap:14px;margin-top:16px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:100%}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px 14px;border-radius:99px;font:500 14px var(--body);cursor:pointer;display:flex;gap:8px;align-items:center}
+.chip[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.sw{width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.25)}
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.spec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.spec small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.spec strong{font:400 26px var(--display);letter-spacing:.03em;font-variant-numeric:tabular-nums}
+.cta{display:flex;justify-content:center;align-items:center;gap:8px;text-decoration:none;background:transparent;color:var(--accent);border:1.5px solid var(--accent);border-radius:14px;padding:14px;font:600 16px var(--body)}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+footer{padding:16px;text-align:center;font-size:12px;color:var(--muted)}
+@media (min-width:760px){ .controls{grid-template-columns:1fr 1fr} .controls .full{grid-column:1/-1} }
+</style>
+</head>
+<body oncontextmenu="return false">
+<header>
+  <a class="brand" href="https://ds3dprint.com" target="_blank" rel="noopener"><img src="../logo-dark.png" alt="" draggable="false">DS <b>3D</b> PRINT</a>
+  <span class="tag">Pré-visualização privada</span>
+</header>
+
+<main>
+  <h1 id="title">Organizador de secretária · 24 cm</h1>
+  <p class="sub">Roda com o dedo para ver todos os lados. Carrega em <b>Ver no meu espaço</b> para o pôr em cima da tua secretária, em tamanho real.</p>
+
+  <div class="stage" id="stage">
+    <model-viewer id="mv" src="m.glb"
+      alt="Pré-visualização 3D da peça"
+      camera-controls touch-action="pan-y" interaction-prompt="auto"
+      ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
+      shadow-intensity="1.15" shadow-softness="0.65" exposure="1.05"
+      environment-image="neutral" tone-mapping="neutral"
+      camera-orbit="-20deg 68deg auto" min-camera-orbit="auto auto auto"
+      disable-pan>
+      <button slot="ar-button" class="ar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>
+        Ver no meu espaço
+      </button>
+      <div class="no-ar" id="noAr">Para ver em realidade aumentada abre este link no telemóvel (iPhone ou Android).</div>
+
+      <button slot="hotspot-dX" class="dot" data-position="0 0 0"></button>
+      <div slot="hotspot-lX" class="dim" data-position="0 0 0"></div>
+      <button slot="hotspot-dY" class="dot" data-position="0 0 0"></button>
+      <div slot="hotspot-lY" class="dim" data-position="0 0 0"></div>
+      <button slot="hotspot-dZ" class="dot" data-position="0 0 0"></button>
+      <div slot="hotspot-lZ" class="dim" data-position="0 0 0"></div>
+      <svg id="dimLines" xmlns="http://www.w3.org/2000/svg"><line/><line/><line/></svg>
+      <div class="watermark">DS 3D PRINT · PRÉ-VISUALIZAÇÃO</div>
+    </model-viewer>
+  </div>
+
+  <section class="controls">
+    <div class="full">
+      <div class="specs">
+        <div class="spec"><small>Largura</small><strong id="sL">—</strong></div>
+        <div class="spec"><small>Altura</small><strong id="sA">—</strong></div>
+        <div class="spec"><small>Profundidade</small><strong id="sP">—</strong></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="label">Cor do filamento</span>
+      <div class="row" id="colors"></div>
+    </div>
+
+    <div class="row">
+      <span class="label">Ver</span>
+      <button class="chip" id="dimsBtn" aria-pressed="false">📏 Mostrar medidas</button>
+      <button class="chip" id="spinBtn" aria-pressed="false">↻ Rodar sozinho</button>
+    </div>
+
+    <a class="cta full" id="cta" target="_blank" rel="noopener">Gostei — quero encomendar</a>
+    <p class="note full">A peça aparece em tamanho real e não pode ser aumentada nem encolhida. A precisão da realidade aumentada depende do telemóvel (normalmente poucos milímetros); as medidas exatas são as indicadas acima. Este modelo é apenas uma pré-visualização: a versão de impressão fica com a DS 3D PRINT.</p>
+  </section>
+</main>
+<footer>© DS 3D PRINT · Vila Nova de Famalicão</footer>
+
+<script type="module">
+// ===== Configuração (muda por cliente) =====
+const CONFIG = {
+  titulo: 'Organizador de secretária · 24 cm',
+  whatsapp: '351911780404',
+  referencia: 'PV-0002',
+  cores: [
+    { nome:'Madeira', hex:'#b07f4f', rough:0.75 },
+    { nome:'Branco',  hex:'#eeeeea' },
+    { nome:'Preto',   hex:'#1d1d1f' },
+    { nome:'Cinza',   hex:'#8a8a8d' },
+    { nome:'Vermelho',hex:'#c8231c' },
+    { nome:'Laranja', hex:'#f07a1a' },
+    { nome:'Dourado', hex:'#c9a14a', metal:0.55, rough:0.38 },
+  ]
+};
+
+const mv = document.getElementById('mv');
+document.getElementById('title').textContent = CONFIG.titulo;
+document.title = CONFIG.titulo + ' · DS 3D PRINT';
+
+// CTA WhatsApp
+const msg = encodeURIComponent(`Olá DS 3D PRINT! Vi a pré-visualização "${CONFIG.titulo}" (ref. ${CONFIG.referencia}) e quero avançar com a encomenda.`);
+document.getElementById('cta').href = CONFIG.whatsapp ? `https://wa.me/${CONFIG.whatsapp}?text=${msg}` : `https://wa.me/?text=${msg}`;
+
+// cores
+const hex2lin = h => { const n=parseInt(h.slice(1),16); return [n>>16,(n>>8)&255,n&255].map(c=>{c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)}); };
+const box = document.getElementById('colors');
+let current = 0;
+function applyColor(i){
+  current=i; const c=CONFIG.cores[i]; const m = mv.model?.materials?.[0]; if(!m) return;
+  m.pbrMetallicRoughness.setBaseColorFactor([...hex2lin(c.hex),1]);
+  m.pbrMetallicRoughness.setMetallicFactor(c.metal ?? 0);
+  m.pbrMetallicRoughness.setRoughnessFactor(c.rough ?? 0.62);
+  [...box.children].forEach((b,j)=>b.setAttribute('aria-pressed', j===i));
+}
+CONFIG.cores.forEach((c,i)=>{
+  const b=document.createElement('button'); b.className='chip'; b.setAttribute('aria-pressed','false');
+  b.innerHTML=`<span class="sw" style="background:${c.hex}"></span>${c.nome}`; b.onclick=()=>applyColor(i); box.appendChild(b);
+});
+
+// medidas reais, lidas do próprio modelo (metros -> mm)
+const fmt = m => (m*1000).toFixed(0) + ' mm';
+const lines = [...document.querySelectorAll('#dimLines line')];
+function drawLine(line, a, b){
+  if(!a || !b || !a.facingCamera && !b.facingCamera){ line.setAttribute('visibility','hidden'); return; }
+  line.setAttribute('visibility','visible');
+  line.setAttribute('x1',a.canvasPosition.x); line.setAttribute('y1',a.canvasPosition.y);
+  line.setAttribute('x2',b.canvasPosition.x); line.setAttribute('y2',b.canvasPosition.y);
+}
+let corners=null;
+mv.addEventListener('load', () => {
+  applyColor(0);
+  const c = mv.getBoundingBoxCenter(), s = mv.getDimensions();
+  document.getElementById('sL').textContent = fmt(s.x);
+  document.getElementById('sA').textContent = fmt(s.y);
+  document.getElementById('sP').textContent = fmt(s.z);
+  const x0=c.x-s.x/2, x1=c.x+s.x/2, y0=c.y-s.y/2, y1=c.y+s.y/2, z0=c.z-s.z/2, z1=c.z+s.z/2, g=0.01;
+  // linhas na frente/base e lateral
+  const P = (n,x,y,z)=>mv.updateHotspot({name:n, position:`${x} ${y} ${z}`});
+  P('hotspot-dX', x0, y0, z1+g);                     // largura: ponto A
+  P('hotspot-lX', c.x, y0-0.012, z1+g);
+  P('hotspot-dY', x1+g, y1, z1);                      // altura
+  P('hotspot-lY', x1+g+0.012, c.y, z1);
+  P('hotspot-dZ', x1+g, y0, z0);                      // profundidade
+  P('hotspot-lZ', x1+g+0.012, y0, c.z);
+  mv.querySelector('[slot=hotspot-lX]').textContent = fmt(s.x);
+  mv.querySelector('[slot=hotspot-lY]').textContent = fmt(s.y);
+  mv.querySelector('[slot=hotspot-lZ]').textContent = fmt(s.z);
+  corners = {
+    xA:`${x0} ${y0} ${z1+g}`, xB:`${x1} ${y0} ${z1+g}`,
+    yA:`${x1+g} ${y0} ${z1}`, yB:`${x1+g} ${y1} ${z1}`,
+    zA:`${x1+g} ${y0} ${z1}`, zB:`${x1+g} ${y0} ${z0}`,
+  };
+  ['xA','xB','yA','yB','zA','zB'].forEach(k=>mv.updateHotspot({name:'hotspot-c'+k, position:corners[k]}));
+});
+// hotspots invisíveis para as pontas das linhas
+['xA','xB','yA','yB','zA','zB'].forEach(k=>{ const d=document.createElement('div'); d.slot='hotspot-c'+k; d.className='dot'; d.dataset.position='0 0 0'; mv.appendChild(d); });
+function render(){
+  if(corners && document.getElementById('stage').classList.contains('show-dims')){
+    const q=k=>mv.queryHotspot('hotspot-c'+k);
+    drawLine(lines[0], q('xA'), q('xB')); drawLine(lines[1], q('yA'), q('yB')); drawLine(lines[2], q('zA'), q('zB'));
+  }
+  requestAnimationFrame(render);
+}
+render();
+
+const dimsBtn=document.getElementById('dimsBtn');
+dimsBtn.onclick=()=>{ const on=document.getElementById('stage').classList.toggle('show-dims'); dimsBtn.setAttribute('aria-pressed',on); };
+const spinBtn=document.getElementById('spinBtn');
+spinBtn.onclick=()=>{ const on=!mv.hasAttribute('auto-rotate'); mv.toggleAttribute('auto-rotate',on); spinBtn.setAttribute('aria-pressed',on); };
+
+mv.addEventListener('ar-status', e => { if(e.detail.status==='failed') document.getElementById('noAr').style.display='block'; });
+// em computador: sem AR -> mostrar dica
+setTimeout(()=>{ if(!mv.canActivateAR) document.getElementById('noAr').style.display='block'; }, 1500);
+</script>
+</body>
+</html>
