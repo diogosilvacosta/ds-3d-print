@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Pedidos | DS 3D PRINT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-common.css">
+    <style>
+        .pedido-card {
+            border: 1px solid var(--border, #242424);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px;
+            background: rgba(255,255,255,0.02);
+        }
+        .pedido-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+        .pedido-nome { font-weight: 800; font-size: 1rem; }
+        .pedido-data { font-size: 0.75rem; opacity: 0.6; }
+        .pedido-meta { font-size: 0.82rem; line-height: 1.7; opacity: 0.85; }
+        .pedido-desc { font-size: 0.85rem; margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; white-space: pre-wrap; }
+        .pedido-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+        .estado-select { padding: 8px 10px; border-radius: 6px; }
+        .estado-badge { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 20px; }
+        .estado-novo { background: rgba(232,53,42,0.2); color: #ff8a80; }
+        .estado-analise { background: rgba(240,192,64,0.2); color: #f0c040; }
+        .estado-respondido { background: rgba(79,195,247,0.2); color: #4fc3f7; }
+        .estado-concluido { background: rgba(129,199,132,0.2); color: #81c784; }
+        .filtros-pedidos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="hero-admin">
+            <div class="hero-badge">Pedidos</div>
+            <h1>Pedidos de Orcamento</h1>
+            <p>Pedidos enviados pelo formulario do site, com os ficheiros 3D anexados e o contacto do cliente.</p>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <a class="nav-link" href="admin.html">Visao Geral</a>
+        <a class="nav-link" href="admin-catalogo.html">Catalogo</a>
+        <a class="nav-link" href="admin-site.html">Site</a>
+        <a class="nav-link" href="admin-operacoes.html">Operacoes</a>
+        <a class="nav-link active" href="admin-pedidos.html">Pedidos</a>
+        <a class="nav-link" href="admin-previsualizacoes.html">Pre-visualizacoes</a>
+        <a class="nav-link" href="index.html">Ver Site</a>
+    </nav>
+
+    <div id="login-section" class="admin-panel login-box">
+        <div class="card-head">
+            <h2>Acesso</h2>
+        </div>
+        <p class="card-subtitle">Entra com o utilizador autorizado para ver os pedidos.</p>
+        <label>Utilizador</label>
+        <input type="text" id="user" placeholder="Utilizador">
+        <label>Password</label>
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="adminLogin()" style="margin-top: 14px;">Entrar</button>
+    </div>
+
+    <div id="app-shell" class="admin-panel hidden">
+        <div class="admin-header">
+            <div>
+                <h2>Pedidos Recebidos</h2>
+                <p class="card-subtitle">Os mais recentes aparecem primeiro. Muda o estado para organizares o trabalho.</p>
+            </div>
+            <button onclick="logout()" class="mini-btn btn-secondary">Sair</button>
+        </div>
+
+        <div id="stats-pedidos" class="stats-grid" style="margin-bottom: 18px;"></div>
+
+        <div class="admin-card">
+            <div class="filtros-pedidos" id="filtros-pedidos">
+                <button class="mini-btn btn-secondary" data-filtro="todos" onclick="setFiltro('todos', this)">Todos</button>
+                <button class="mini-btn btn-secondary" data-filtro="novo" onclick="setFiltro('novo', this)">Novos</button>
+                <button class="mini-btn btn-secondary" data-filtro="analise" onclick="setFiltro('analise', this)">Em analise</button>
+                <button class="mini-btn btn-secondary" data-filtro="respondido" onclick="setFiltro('respondido', this)">Respondidos</button>
+                <button class="mini-btn btn-secondary" data-filtro="concluido" onclick="setFiltro('concluido', this)">Concluidos</button>
+            </div>
+            <div id="lista-pedidos">A carregar...</div>
+        </div>
+    </div>
+
+    <script src="admin-common.js"></script>
+    <script>
+        wireLoginEnter();
+
+        let todosPedidos = [];
+        let filtroAtivo = "todos";
+
+        const ESTADOS = {
+            novo: { label: "Novo", cls: "estado-novo" },
+            analise: { label: "Em analise", cls: "estado-analise" },
+            respondido: { label: "Respondido", cls: "estado-respondido" },
+            concluido: { label: "Concluido", cls: "estado-concluido" }
+        };
+
+        function esc(str) {
+            const div = document.createElement("div");
+            div.textContent = String(str || "");
+            return div.innerHTML;
+        }
+
+        function setFiltro(filtro, btn) {
+            filtroAtivo = filtro;
+            document.querySelectorAll("#filtros-pedidos .mini-btn").forEach(b => b.classList.remove("btn-destaque-on"));
+            if (btn) btn.classList.add("btn-destaque-on");
+            renderPedidos();
+        }
+
+        async function carregarPedidos() {
+            const { data, error } = await adminSupabase
+                .from("pedidos_orcamento")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            if (error) {
+                document.getElementById("lista-pedidos").innerHTML =
+                    "<div class='field-note'>Erro a carregar pedidos. Confirma que a tabela pedidos_orcamento existe (ver setup-supabase.sql).</div>";
+                return;
+            }
+
+            todosPedidos = data || [];
+            renderStats();
+            renderPedidos();
+        }
+
+        function renderStats() {
+            const novos = todosPedidos.filter(p => (p.estado || "novo") === "novo").length;
+            const analise = todosPedidos.filter(p => p.estado === "analise").length;
+            document.getElementById("stats-pedidos").innerHTML = `
+                <div class="stat-box"><span>Total</span><strong>${todosPedidos.length}</strong></div>
+                <div class="stat-box"><span>Novos</span><strong>${novos}</strong></div>
+                <div class="stat-box"><span>Em Analise</span><strong>${analise}</strong></div>
+            `;
+        }
+
+        function whatsappLink(contacto, nome) {
+            const digits = String(contacto || "").replace(/[^\d+]/g, "");
+            if (digits.length < 9) return "";
+            const num = digits.startsWith("+") ? digits.slice(1) : (digits.startsWith("351") ? digits : "351" + digits);
+            const msg = encodeURIComponent(`Ola ${nome || ""}! Recebemos o teu pedido de orcamento na DS 3D PRINT.`);
+            return `https://wa.me/${num}?text=${msg}`;
+        }
+
+        function renderPedidos() {
+            const lista = todosPedidos.filter(p => filtroAtivo === "todos" || (p.estado || "novo") === filtroAtivo);
+
+            if (!lista.length) {
+                document.getElementById("lista-pedidos").innerHTML = "<div class='field-note'>Sem pedidos neste filtro.</div>";
+                return;
+            }
+
+            document.getElementById("lista-pedidos").innerHTML = lista.map(p => {
+                const estado = ESTADOS[p.estado || "novo"] || ESTADOS.novo;
+                const dataFmt = p.created_at ? new Date(p.created_at).toLocaleString("pt-PT") : "";
+                const wa = whatsappLink(p.contacto, p.nome);
+                return `
+                <div class="pedido-card">
+                    <div class="pedido-head">
+                        <div>
+                            <span class="pedido-nome">${esc(p.nome)}</span>
+                            <span class="estado-badge ${estado.cls}" style="margin-left:10px;">${estado.label}</span>
+                        </div>
+                        <span class="pedido-data">${dataFmt}</span>
+                    </div>
+                    <div class="pedido-meta">
+                        <i class="fas fa-phone-alt"></i> ${esc(p.contacto)}
+                        ${p.email ? ` &nbsp;·&nbsp; <i class="fas fa-envelope"></i> ${esc(p.email)}` : ""}
+                        &nbsp;·&nbsp; <i class="fas fa-cube"></i> ${esc(p.material || "Sem preferencia")}
+                        &nbsp;·&nbsp; <i class="fas fa-hashtag"></i> Qtd: ${esc(p.quantidade || 1)}
+                    </div>
+                    ${p.descricao ? `<div class="pedido-desc">${esc(p.descricao)}</div>` : ""}
+                    <div class="pedido-actions">
+                        ${p.ficheiro_path ? `<button class="mini-btn btn-edit" onclick="descarregarFicheiro('${esc(p.ficheiro_path)}')"><i class="fas fa-download"></i> Ficheiro 3D</button>` : "<span class='pedido-data'>Sem ficheiro</span>"}
+                        ${wa ? `<a class="mini-btn btn-destaque-off" href="${wa}" target="_blank" style="text-decoration:none;"><i class="fab fa-whatsapp"></i> Responder</a>` : ""}
+                        <select class="estado-select" onchange="mudarEstado('${p.id}', this.value)">
+                            ${Object.entries(ESTADOS).map(([k, v]) => `<option value="${k}" ${(p.estado || "novo") === k ? "selected" : ""}>${v.label}</option>`).join("")}
+                        </select>
+                        <button class="mini-btn btn-del" onclick="apagarPedido('${p.id}')">Eliminar</button>
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        async function descarregarFicheiro(path) {
+            const { data, error } = await adminSupabase.storage
+                .from("orcamentos")
+                .createSignedUrl(path, 60 * 10);
+            if (error || !data) {
+                alert("Nao foi possivel gerar o link do ficheiro.");
+                return;
+            }
+            window.open(data.signedUrl, "_blank");
+        }
+
+        async function mudarEstado(id, estado) {
+            const { error } = await adminSupabase
+                .from("pedidos_orcamento")
+                .update({ estado })
+                .eq("id", id);
+            if (error) alert("Erro ao atualizar estado.");
+            await carregarPedidos();
+        }
+
+        async function apagarPedido(id) {
+            if (!confirm("Eliminar este pedido? O ficheiro anexado tambem deixa de ser necessario.")) return;
+            const { error } = await adminSupabase.from("pedidos_orcamento").delete().eq("id", id);
+            if (error) alert("Erro ao eliminar.");
+            await carregarPedidos();
+        }
+
+        setupAdminPage(carregarPedidos);
+    </script>
+</body>
+</html>

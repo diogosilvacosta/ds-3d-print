@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Pre-visualizacoes | DS 3D PRINT</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-common.css">
+    <style>
+        .pv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; }
+        @media (max-width: 900px) { .pv-grid { grid-template-columns: 1fr; } }
+        .drop {
+            border: 2px dashed var(--line); border-radius: 16px; padding: 28px 16px; text-align: center; cursor: pointer;
+            background: var(--card-soft); transition: border-color .15s, background .15s;
+        }
+        .drop:hover, .drop.over { border-color: var(--red); background: var(--red-soft); }
+        .drop i { font-size: 2rem; color: var(--red); }
+        .drop strong { display: block; margin: 10px 0 4px; font-size: 1.05rem; }
+        .drop:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+        .drop small { color: var(--muted); }
+        .pv-form { display: grid; gap: 10px; margin-top: 14px; }
+        .pv-form label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+        .pv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 520px) { .pv-row { grid-template-columns: 1fr; } }
+        .pv-stage { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(120% 90% at 50% 20%, #232327 0%, #121214 70%); }
+        .pv-stage model-viewer { width: 100%; height: 380px; --progress-bar-color: var(--red); }
+        .pv-empty { height: 380px; display: grid; place-items: center; color: var(--muted); text-align: center; padding: 20px; }
+        .pv-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+        .pv-fact { background: var(--card-soft); border: 1px solid var(--line); border-radius: 12px; padding: 10px; min-width: 0; }
+        .pv-fact span { display: block; font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+        .pv-fact strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+        .pv-colors { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; font-size: .82rem; color: var(--muted); }
+        .sw { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); display: inline-block; }
+        .pv-status { margin-top: 10px; font-size: .85rem; color: var(--muted); min-height: 1.2em; }
+        .pv-status.erro { color: #ff8a80; }
+        .pv-link { margin-top: 14px; padding: 14px; border-radius: 14px; border: 1px solid rgba(37,211,102,.35); background: rgba(37,211,102,.08); }
+        .pv-link code { display: block; font-size: 1rem; word-break: break-all; margin: 6px 0 10px; color: #fff; }
+        .pv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pv-list { display: grid; gap: 10px; }
+        .pv-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.02); }
+        @media (max-width: 700px) { .pv-item { grid-template-columns: 1fr; } }
+        .pv-item-title { font-weight: 800; }
+        .pv-item-meta { font-size: .8rem; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+        .badge { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 3px 9px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+        .b-ativo { background: rgba(129,199,132,.18); color: #81c784; }
+        .b-expirado { background: rgba(240,192,64,.18); color: #f0c040; }
+        .b-off { background: rgba(255,255,255,.08); color: var(--muted); }
+        .b-quente { background: rgba(232,53,42,.2); color: #ff8a80; }
+        button[disabled] { opacity: .5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="hero-admin">
+            <div class="hero-badge">Realidade aumentada</div>
+            <h1>Pre-visualizacoes 3D</h1>
+            <p>Carrega um STL ou 3MF e gera um link para o cliente ver a peca em tamanho real, com a camara do telemovel. O ficheiro original nunca sai deste computador.</p>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <a class="nav-link" href="admin.html">Visao Geral</a>
+        <a class="nav-link" href="admin-catalogo.html">Catalogo</a>
+        <a class="nav-link" href="admin-site.html">Site</a>
+        <a class="nav-link" href="admin-operacoes.html">Operacoes</a>
+        <a class="nav-link" href="admin-pedidos.html">Pedidos</a>
+        <a class="nav-link active" href="admin-previsualizacoes.html">Pre-visualizacoes</a>
+        <a class="nav-link" href="index.html">Ver Site</a>
+    </nav>
+
+    <div id="login-section" class="admin-panel login-box">
+        <div class="card-head"><h2>Acesso</h2></div>
+        <p class="card-subtitle">Entra com o utilizador autorizado.</p>
+        <label>Utilizador</label>
+        <input type="text" id="user" placeholder="Utilizador">
+        <label>Password</label>
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="adminLogin()" style="margin-top: 14px;">Entrar</button>
+    </div>
+
+    <div id="app-shell" class="admin-panel hidden">
+        <div class="admin-header">
+            <div>
+                <h2>Novo link</h2>
+                <p class="card-subtitle">1. Escolhe o ficheiro · 2. Confirma a pre-visualizacao · 3. Gera o link e envia ao cliente.</p>
+            </div>
+            <button onclick="logout()" class="mini-btn btn-secondary">Sair</button>
+        </div>
+
+        <div class="pv-grid">
+            <div class="admin-card">
+                <div class="drop" id="drop" role="button" tabindex="0" aria-label="Escolher ficheiro STL ou 3MF">
+                    <i class="fas fa-cube"></i>
+                    <strong id="dropTitulo">Arrasta aqui o STL ou 3MF</strong>
+                    <small id="dropInfo">ou clica para escolher · 3MF do Bambu Studio mantem as cores</small>
+                </div>
+                <input type="file" id="ficheiro" accept=".stl,.3mf" hidden>
+
+                <div class="pv-form">
+                    <div>
+                        <label for="titulo">Nome da peca (o cliente ve isto)</label>
+                        <input type="text" id="titulo" placeholder="Ex.: Organizador de secretaria · 24 cm" maxlength="90">
+                    </div>
+                    <div class="pv-row">
+                        <div>
+                            <label for="cliente">Cliente</label>
+                            <input type="text" id="cliente" placeholder="Nome ou empresa" maxlength="90">
+                        </div>
+                        <div>
+                            <label for="telefone">Telemovel do cliente (opcional)</label>
+                            <input type="tel" id="telefone" placeholder="912 345 678" maxlength="20">
+                        </div>
+                    </div>
+                    <div class="pv-row">
+                        <div>
+                            <label for="validade">Validade do link</label>
+                            <select id="validade">
+                                <option value="7">7 dias</option>
+                                <option value="15" selected>15 dias</option>
+                                <option value="30">30 dias</option>
+                                <option value="90">90 dias</option>
+                                <option value="0">Sem fim</option>
+                            </select>
+                        </div>
+                        <div id="corWrap">
+                            <label for="corInicial">Cor inicial (pecas de 1 cor)</label>
+                            <select id="corInicial">
+                                <option>Branco</option><option>Preto</option><option>Cinza</option><option>Vermelho</option>
+                                <option>Azul</option><option>Madeira</option><option>Dourado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="gerarBtn" class="btn-success" disabled><i class="fas fa-link"></i> Gerar link</button>
+                </div>
+                <div id="status" class="pv-status" role="status"></div>
+                <div id="resultado" class="pv-link hidden">
+                    <strong><i class="fas fa-check"></i> Link pronto</strong>
+                    <code id="linkTxt"></code>
+                    <div class="pv-actions">
+                        <button class="mini-btn btn-edit" id="copiarBtn"><i class="fas fa-copy"></i> Copiar</button>
+                        <a class="mini-btn btn-destaque-off" id="waBtn" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</a>
+                        <a class="mini-btn btn-secondary" id="abrirBtn" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Abrir</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="pv-stage" id="stage"><div class="pv-empty">A pre-visualizacao aparece aqui, tal como o cliente a vai ver.</div></div>
+                <div class="pv-facts">
+                    <div class="pv-fact"><span>Largura</span><strong id="fL">—</strong></div>
+                    <div class="pv-fact"><span>Altura</span><strong id="fA">—</strong></div>
+                    <div class="pv-fact"><span>Profundidade</span><strong id="fP">—</strong></div>
+                </div>
+                <div class="pv-colors" id="fCores"></div>
+                <p class="field-note" id="fProt" style="margin-top:10px;"></p>
+            </div>
+        </div>
+
+        <div class="admin-card" style="margin-top: 18px;">
+            <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h2>Links enviados</h2>
+                <div id="pvStats" class="field-note"></div>
+            </div>
+            <div id="lista" class="pv-list">A carregar...</div>
+        </div>
+    </div>
+
+    <script src="admin-common.js"></script>
+    <script>
+        wireLoginEnter();
+
+        const SITE = "https://ds3dprint.com";
+        const BUCKET = "previsualizacoes";
+        let convertido = null;   // { glb, sizeMM, colors, multicolor, trisIn, trisOut, decimated }
+        let nomeFicheiro = "";
+        let blobUrl = null;
+
+        const $ = (id) => document.getElementById(id);
+        const esc = (s) => { const d = document.createElement("div"); d.textContent = String(s ?? ""); return d.innerHTML; };
+        const mm = (v) => v == null ? "—" : `${Math.round(v)} mm`;
+        const linkDe = (codigo) => `${SITE}/ver/${codigo}`;
+
+        function setStatus(txt, erro) { const s = $("status"); s.textContent = txt || ""; s.classList.toggle("erro", !!erro); }
+
+        function novoCodigo() {
+            const abc = "abcdefghijkmnpqrstuvwxyz23456789";
+            const r = crypto.getRandomValues(new Uint8Array(8));
+            return Array.from(r, (n) => abc[n % abc.length]).join("");
+        }
+
+        function numeroWhatsApp(tel) {
+            const d = String(tel || "").replace(/[^\d+]/g, "");
+            if (d.replace("+", "").length < 9) return "";
+            if (d.startsWith("+")) return d.slice(1);
+            if (d.startsWith("00")) return d.slice(2);
+            return d.startsWith("351") ? d : "351" + d;
+        }
+        function mensagemCliente(titulo, cliente, codigo) {
+            return `Ola${cliente ? " " + cliente : ""}! Aqui esta a pre-visualizacao da tua peca "${titulo}" da DS 3D PRINT. ` +
+                   `Abre no telemovel e carrega em "Ver no meu espaco" para a veres em tamanho real em cima da tua mesa: ${linkDe(codigo)}`;
+        }
+        function waHref(tel, titulo, cliente, codigo) {
+            const n = numeroWhatsApp(tel);
+            return `https://wa.me/${n}?text=${encodeURIComponent(mensagemCliente(titulo, cliente, codigo))}`;
+        }
+
+        // ---------- escolher ficheiro ----------
+        const drop = $("drop");
+        ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+        ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+        drop.addEventListener("click", () => $("ficheiro").click());
+        drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("ficheiro").click(); } });
+        drop.addEventListener("drop", (e) => { const f = e.dataTransfer.files[0]; if (f) tratarFicheiro(f); });
+        $("ficheiro").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) tratarFicheiro(f); });
+
+        async function tratarFicheiro(f) {
+            if (!/\.(stl|3mf)$/i.test(f.name)) { setStatus("Escolhe um ficheiro .stl ou .3mf.", true); return; }
+            if (f.size > 250 * 1024 * 1024) { setStatus("O ficheiro tem mais de 250 MB. Exporta uma versao mais leve.", true); return; }
+            convertido = null; $("gerarBtn").disabled = true; $("resultado").classList.add("hidden");
+            nomeFicheiro = f.name;
+            $("dropTitulo").textContent = f.name;
+            $("dropInfo").textContent = `${(f.size / 1048576).toFixed(1)} MB · a preparar...`;
+            if (!$("titulo").value.trim()) {
+                $("titulo").value = f.name.replace(/\.(stl|3mf)$/i, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 90);
+            }
+            setStatus("A preparar a versao de visualizacao (tamanho real, cores e protecao)...");
+            const t0 = performance.now();
+            try {
+                const buf = await f.arrayBuffer();
+                const r = await new Promise((resolve, reject) => {
+                    const w = new Worker("admin-conversor-worker.js", { type: "module" });
+                    w.onmessage = (e) => { w.terminate(); e.data.ok ? resolve(e.data) : reject(new Error(e.data.error)); };
+                    w.onerror = (e) => { w.terminate(); reject(new Error(e.message || "Falha na conversao.")); };
+                    w.postMessage({ buf, name: f.name }, [buf]);
+                });
+                convertido = r;
+                mostrarPreview(r);
+                $("dropInfo").textContent = `${(f.size / 1048576).toFixed(1)} MB · pronto em ${((performance.now() - t0) / 1000).toFixed(1)} s`;
+                setStatus("Confirma a pre-visualizacao e carrega em Gerar link.");
+                $("gerarBtn").disabled = false;
+            } catch (err) {
+                setStatus("Nao consegui ler este ficheiro: " + err.message, true);
+                $("dropInfo").textContent = "Tenta outro ficheiro ou exporta de novo.";
+            }
+        }
+
+        function mostrarPreview(r) {
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+            blobUrl = URL.createObjectURL(new Blob([r.glb], { type: "model/gltf-binary" }));
+            $("stage").innerHTML = `<model-viewer src="${blobUrl}" camera-controls shadow-intensity="1.1" environment-image="neutral" tone-mapping="neutral" camera-orbit="-20deg 72deg auto" auto-rotate></model-viewer>`;
+            $("fL").textContent = mm(r.sizeMM.largura);
+            $("fA").textContent = mm(r.sizeMM.altura);
+            $("fP").textContent = mm(r.sizeMM.profundidade);
+            $("fCores").innerHTML = r.multicolor
+                ? "Cores do 3MF: " + r.colors.map((c) => `<span class="sw" style="background:${c}" title="${c}"></span>`).join("")
+                : "Uma cor: o cliente pode experimentar as cores de filamento.";
+            $("corWrap").style.opacity = r.multicolor ? .4 : 1;
+            $("corInicial").disabled = r.multicolor;
+            const kb = r.glb.byteLength / 1024;
+            $("fProt").textContent = (r.decimated
+                ? `Protecao: detalhe reduzido de ${r.trisIn.toLocaleString("pt-PT")} para ${r.trisOut.toLocaleString("pt-PT")} triangulos e pontos desviados ~0,15 mm.`
+                : `Protecao: ${r.trisOut.toLocaleString("pt-PT")} triangulos com pontos desviados ~0,15 mm (estraga encaixes de uma copia).`)
+                + ` Ficheiro para o cliente: ${kb > 1024 ? (kb / 1024).toFixed(1) + " MB" : Math.round(kb) + " KB"}.`;
+        }
+
+        // ---------- gerar link ----------
+        $("gerarBtn").addEventListener("click", gerarLink);
+        async function gerarLink() {
+            if (!convertido) return;
+            const titulo = $("titulo").value.trim();
+            if (!titulo) { setStatus("Escreve o nome da peca.", true); $("titulo").focus(); return; }
+            $("gerarBtn").disabled = true;
+            setStatus("A enviar a versao de visualizacao...");
+            const codigo = novoCodigo();
+            const path = `${codigo}/${crypto.randomUUID()}.glb`;
+            const up = await adminSupabase.storage.from(BUCKET)
+                .upload(path, new Blob([convertido.glb], { type: "model/gltf-binary" }), { contentType: "model/gltf-binary", upsert: false });
+            if (up.error) { setStatus("Erro ao enviar: " + up.error.message + " (correste o setup-previsualizacoes.sql?)", true); $("gerarBtn").disabled = false; return; }
+
+            const dias = Number($("validade").value);
+            const registo = {
+                codigo, titulo,
+                cliente: $("cliente").value.trim() || null,
+                telefone_cliente: $("telefone").value.trim() || null,
+                ficheiro_path: path,
+                ficheiro_original: nomeFicheiro,
+                largura_mm: convertido.sizeMM.largura,
+                altura_mm: convertido.sizeMM.altura,
+                profundidade_mm: convertido.sizeMM.profundidade,
+                cores: convertido.colors,
+                multicor: convertido.multicolor,
+                cor_inicial: convertido.multicolor ? null : $("corInicial").value,
+                expira_em: dias ? new Date(Date.now() + dias * 86400000).toISOString() : null,
+            };
+            const ins = await adminSupabase.from("previsualizacoes").insert(registo);
+            if (ins.error) {
+                await adminSupabase.storage.from(BUCKET).remove([path]);
+                setStatus("Erro ao guardar o link: " + ins.error.message, true); $("gerarBtn").disabled = false; return;
+            }
+            setStatus("");
+            $("linkTxt").textContent = linkDe(codigo);
+            $("abrirBtn").href = linkDe(codigo);
+            $("waBtn").href = waHref(registo.telefone_cliente, titulo, registo.cliente, codigo);
+            $("copiarBtn").onclick = () => copiar(linkDe(codigo), $("copiarBtn"));
+            $("resultado").classList.remove("hidden");
+            carregarLista();
+        }
+
+        async function copiar(txt, btn) {
+            try { await navigator.clipboard.writeText(txt); const o = btn.innerHTML; btn.innerHTML = '<i class="fas fa-check"></i> Copiado'; setTimeout(() => btn.innerHTML = o, 1500); }
+            catch { prompt("Copia o link:", txt); }
+        }
+
+        // ---------- lista ----------
+        let links = [];
+        async function carregarLista() {
+            const { data, error } = await adminSupabase.from("previsualizacoes").select("*").order("created_at", { ascending: false });
+            if (error) {
+                $("lista").innerHTML = "<div class='field-note'>Ainda nao ha tabela de pre-visualizacoes. Corre o ficheiro setup-previsualizacoes.sql no Supabase (SQL Editor).</div>";
+                return;
+            }
+            links = data || [];
+            const ativos = links.filter((l) => estadoDe(l) === "ativo").length;
+            const vistas = links.reduce((s, l) => s + (l.vistas || 0), 0);
+            const cliques = links.reduce((s, l) => s + (l.cliques_encomenda || 0), 0);
+            $("pvStats").textContent = `${ativos} ativos · ${vistas} visitas · ${cliques} cliques em encomendar`;
+            if (!links.length) { $("lista").innerHTML = "<div class='field-note'>Ainda nao criaste nenhum link.</div>"; return; }
+            $("lista").innerHTML = links.map(itemHtml).join("");
+        }
+        function estadoDe(l) {
+            if (!l.ativo) return "off";
+            if (l.expira_em && new Date(l.expira_em) < new Date()) return "expirado";
+            return "ativo";
+        }
+        function itemHtml(l) {
+            const est = estadoDe(l);
+            const badge = { ativo: "<span class='badge b-ativo'>Ativo</span>", expirado: "<span class='badge b-expirado'>Expirado</span>", off: "<span class='badge b-off'>Desativado</span>" }[est];
+            const quente = l.cliques_encomenda ? "<span class='badge b-quente'>Quer encomendar</span>" : "";
+            const criado = new Date(l.created_at).toLocaleDateString("pt-PT");
+            const expira = l.expira_em ? new Date(l.expira_em).toLocaleDateString("pt-PT") : "sem fim";
+            const vista = l.ultima_vista ? ` · ultima visita ${new Date(l.ultima_vista).toLocaleString("pt-PT")}` : "";
+            return `<div class="pv-item">
+                <div>
+                    <div class="pv-item-title">${esc(l.titulo)}${badge}${quente}</div>
+                    <div class="pv-item-meta">
+                        ${l.cliente ? `<i class="fas fa-user"></i> ${esc(l.cliente)} · ` : ""}criado ${criado} · expira ${expira}<br>
+                        <i class="fas fa-eye"></i> ${l.vistas || 0} visitas${vista} · <i class="fas fa-cart-shopping"></i> ${l.cliques_encomenda || 0} cliques em encomendar<br>
+                        <span style="opacity:.8">${linkDe(l.codigo)}</span>
+                    </div>
+                </div>
+                <div class="pv-actions">
+                    <button class="mini-btn btn-edit" onclick="copiar('${linkDe(l.codigo)}', this)" title="Copiar link"><i class="fas fa-copy"></i></button>
+                    <a class="mini-btn btn-secondary" href="${linkDe(l.codigo)}" target="_blank" rel="noopener" title="Abrir"><i class="fas fa-up-right-from-square"></i></a>
+                    <a class="mini-btn btn-destaque-off" href="${waHref(l.telefone_cliente, l.titulo, l.cliente, l.codigo)}" target="_blank" rel="noopener" title="Enviar por WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <button class="mini-btn btn-secondary" onclick="prolongar('${l.codigo}')" title="Mais 15 dias">+15 dias</button>
+                    <button class="mini-btn btn-secondary" onclick="alternar('${l.codigo}', ${!l.ativo})">${l.ativo ? "Desativar" : "Ativar"}</button>
+                    <button class="mini-btn btn-del" onclick="apagar('${l.codigo}')" title="Apagar"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }
+        async function prolongar(codigo) {
+            const l = links.find((x) => x.codigo === codigo); if (!l) return;
+            const base = l.expira_em && new Date(l.expira_em) > new Date() ? new Date(l.expira_em) : new Date();
+            const { error } = await adminSupabase.from("previsualizacoes").update({ expira_em: new Date(base.getTime() + 15 * 86400000).toISOString(), ativo: true }).eq("codigo", codigo);
+            if (error) alert("Erro: " + error.message);
+            carregarLista();
+        }
+        async function alternar(codigo, ativo) {
+            const { error } = await adminSupabase.from("previsualizacoes").update({ ativo }).eq("codigo", codigo);
+            if (error) alert("Erro: " + error.message);
+            carregarLista();
+        }
+        async function apagar(codigo) {
+            const l = links.find((x) => x.codigo === codigo); if (!l) return;
+            if (!confirm(`Apagar o link de "${l.titulo}"? O cliente deixa de o conseguir abrir.`)) return;
+            await adminSupabase.storage.from(BUCKET).remove([l.ficheiro_path]);
+            const { error } = await adminSupabase.from("previsualizacoes").delete().eq("codigo", codigo);
+            if (error) alert("Erro: " + error.message);
+            carregarLista();
+        }
+
+        setupAdminPage(carregarLista);
+    </script>
+</body>
+</html>

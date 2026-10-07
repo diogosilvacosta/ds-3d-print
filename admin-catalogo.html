@@ -22,6 +22,8 @@
         <a class="nav-link active" href="admin-catalogo.html">Catalogo</a>
         <a class="nav-link" href="admin-site.html">Site</a>
         <a class="nav-link" href="admin-operacoes.html">Operacoes</a>
+        <a class="nav-link" href="admin-pedidos.html">Pedidos</a>
+        <a class="nav-link" href="admin-previsualizacoes.html">Pre-visualizacoes</a>
         <a class="nav-link" href="index.html">Ver Site</a>
     </nav>
 
@@ -170,14 +172,16 @@
             btn.disabled = true;
 
             try {
-                if (usarIA) {
+                const removeBgKey = usarIA ? getRemoveBgKey() : "";
+                if (usarIA && removeBgKey) {
                     const formData = new FormData();
                     formData.append("image_file", file);
                     const resp = await fetch("https://api.remove.bg/v1.0/removebg", {
                         method: "POST",
-                        headers: { "X-Api-Key": REMOVE_BG_KEY },
+                        headers: { "X-Api-Key": removeBgKey },
                         body: formData
                     });
+                    if (!resp.ok) throw new Error("remove.bg falhou");
                     fotosBlobs.push(await resp.blob());
                 } else {
                     fotosBlobs.push(file);
