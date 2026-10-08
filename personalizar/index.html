@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cria o teu porta-chaves · DS 3D PRINT</title>
+<meta name="description" content="Escreve o nome, escolhe a letra e as cores, e vê o teu porta-chaves ou íman em 3D e em tamanho real antes de encomendar.">
+<meta name="theme-color" content="#080808">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Fredoka:wght@700&family=Pacifico&family=Lobster&family=Righteous&family=Baloo+2:wght@800&display=swap" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+:root{
+  --bg:#080808; --panel:#111111; --panel2:#161616; --line:#242424; --text:#f0f0f0; --muted:#8a8a8a;
+  --accent:#e8352a; --accent-ink:#ffffff; --ok:#25d366;
+  --display:'Bebas Neue',Impact,sans-serif; --body:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body)}
+body{min-height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);letter-spacing:.06em;font-size:22px;color:var(--text);text-decoration:none}
+.brand img{width:44px;height:auto}
+.brand b{color:var(--accent);font-weight:400}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 9px;border-radius:99px;white-space:nowrap}
+main{flex:1;width:100%;max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:18px;grid-template-columns:1fr}
+@media (min-width:900px){ main{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start} .stage-wrap{position:sticky;top:16px} }
+h1{font-family:var(--display);font-size:38px;font-weight:400;letter-spacing:.03em;line-height:1;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;line-height:1.5;margin-top:6px}
+.stage{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#232327 0%,#121214 70%);border:1px solid var(--line);margin-top:14px}
+model-viewer{width:100%;height:min(52dvh,460px);--poster-color:transparent;--progress-bar-color:var(--accent)}
+.ar-btn{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;background:var(--accent);color:var(--accent-ink);border:0;border-radius:99px;padding:13px 20px;font:600 15px var(--body);box-shadow:0 8px 30px rgba(232,53,42,.4);cursor:pointer;white-space:nowrap}
+.ar-btn svg{width:20px;height:20px}
+.busy{position:absolute;top:12px;right:12px;font-size:12px;color:var(--muted);background:rgba(0,0,0,.55);padding:5px 10px;border-radius:99px}
+.medidas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.medida{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:0}
+.medida small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.medida strong{font:400 24px var(--display);letter-spacing:.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.aviso{margin-top:10px;font-size:13px;color:#f0c040;min-height:1em}
+form{display:grid;gap:18px}
+fieldset{border:0;padding:0;display:grid;gap:8px;min-width:0}
+legend,.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;padding:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 15px var(--body);padding:11px;border-radius:10px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+input[type=text],input[type=tel],textarea,input[type=number]{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:13px 14px;font:500 17px var(--body)}
+textarea{min-height:76px;resize:vertical;font-size:15px}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+#texto{font-size:22px;font-weight:700}
+.fontes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fonte{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:12px 6px;font-size:21px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fonte[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.range{display:flex;align-items:center;gap:12px}
+.range input{flex:1;accent-color:var(--accent)}
+.range output{font:400 22px var(--display);min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.cores{display:flex;flex-wrap:wrap;gap:8px}
+.cor{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);cursor:pointer;position:relative}
+.cor[aria-pressed=true]{border-color:var(--text);box-shadow:0 0 0 3px var(--accent)}
+.qtd{display:flex;align-items:center;gap:8px}
+.qtd button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:22px;cursor:pointer}
+.qtd input{width:90px;text-align:center}
+.encomenda{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px}
+.encomenda h2{font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.03em}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){ .duo{grid-template-columns:1fr} }
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;border:0;border-radius:14px;padding:15px;font:700 16px var(--body);cursor:pointer;text-decoration:none}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-ok{background:var(--ok);color:#06210f}
+.btn[disabled]{opacity:.55;cursor:wait}
+.estado{font-size:14px;color:var(--muted);min-height:1.2em}
+.estado.erro{color:#ff8a80}
+.sucesso{display:grid;gap:10px;text-align:center;padding:8px 0}
+.sucesso strong{font-family:var(--display);font-size:30px;font-weight:400;letter-spacing:.03em}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+footer{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;color:var(--muted)}
+[hidden]{display:none!important}
+button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="https://ds3dprint.com" target="_blank" rel="noopener"><img src="/ver/logo-dark.png" alt="" draggable="false">DS <b>3D</b> PRINT</a>
+  <span class="tag">Personalizador</span>
+</header>
+
+<main>
+  <section class="stage-wrap">
+    <h1 id="titulo">Cria o teu porta-chaves</h1>
+    <p class="sub">Escreve o nome, escolhe a letra e as cores. A peça muda na hora. No telemóvel, carrega em <b>Ver no meu espaço</b> para a veres em tamanho real.</p>
+    <div class="stage">
+      <model-viewer id="mv" alt="Pré-visualização 3D da peça personalizada" camera-controls touch-action="pan-y"
+        ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
+        shadow-intensity="1.1" shadow-softness="0.7" exposure="1.05" environment-image="neutral" tone-mapping="neutral"
+        camera-orbit="0deg 35deg auto" interaction-prompt="none" disable-pan>
+        <button slot="ar-button" class="ar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>
+          Ver no meu espaço
+        </button>
+      </model-viewer>
+      <span class="busy" id="busy" hidden>A atualizar…</span>
+    </div>
+    <div class="medidas">
+      <div class="medida"><small>Comprimento</small><strong id="mL">—</strong></div>
+      <div class="medida"><small>Altura</small><strong id="mA">—</strong></div>
+      <div class="medida"><small>Espessura</small><strong id="mE">—</strong></div>
+    </div>
+    <p class="aviso" id="aviso" role="status"></p>
+  </section>
+
+  <section>
+    <form id="form" autocomplete="off">
+      <fieldset>
+        <legend>Peça</legend>
+        <div class="seg" id="tipo">
+          <button type="button" data-tipo="porta-chaves" aria-pressed="true">Porta-chaves</button>
+          <button type="button" data-tipo="iman" aria-pressed="false">Íman</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <label class="lbl" for="texto">Nome ou texto</label>
+        <input type="text" id="texto" maxlength="16" value="Joana" spellcheck="false">
+      </fieldset>
+
+      <fieldset>
+        <legend>Letra</legend>
+        <div class="fontes" id="fontes"></div>
+      </fieldset>
+
+      <fieldset>
+        <label class="lbl" for="tamanho">Altura das letras</label>
+        <div class="range"><input type="range" id="tamanho" min="8" max="24" step="1" value="14"><output id="tamanhoOut">14 mm</output></div>
+      </fieldset>
+
+      <fieldset>
+        <legend id="corBaseLbl">Cor da base</legend>
+        <div class="cores" id="corBase"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Cor das letras</legend>
+        <div class="cores" id="corTexto"></div>
+      </fieldset>
+
+      <fieldset>
+        <label class="lbl" for="qtd">Quantidade</label>
+        <div class="qtd"><button type="button" id="menos" aria-label="Menos uma">−</button><input type="number" id="qtd" min="1" max="999" value="1"><button type="button" id="mais" aria-label="Mais uma">+</button></div>
+      </fieldset>
+
+      <div class="encomenda" id="encomenda">
+        <h2>Encomendar</h2>
+        <div class="duo">
+          <div><label class="lbl" for="nome">O teu nome</label><input type="text" id="nome" maxlength="80" required autocomplete="name"></div>
+          <div><label class="lbl" for="tel">Telemóvel</label><input type="tel" id="tel" maxlength="20" required autocomplete="tel" placeholder="912 345 678"></div>
+        </div>
+        <div><label class="lbl" for="obs">Notas (opcional)</label><textarea id="obs" maxlength="600" placeholder="Ex.: vários nomes, data de entrega, outra cor…"></textarea></div>
+        <button class="btn btn-primary" id="enviar" type="submit">Enviar pedido</button>
+        <p class="estado" id="estado" role="status"></p>
+        <p class="note">Respondemos com o preço e o prazo, normalmente no mesmo dia. Só começamos a imprimir depois de confirmares.</p>
+      </div>
+
+      <div class="encomenda sucesso" id="sucesso" hidden>
+        <strong>Pedido recebido!</strong>
+        <p class="sub" id="sucessoTxt">Vamos responder-te em breve com o preço e o prazo.</p>
+        <a class="btn btn-ok" id="waBtn" target="_blank" rel="noopener">Falar já por WhatsApp</a>
+        <button class="btn" type="button" id="outro" style="background:var(--panel);color:var(--text);border:1px solid var(--line)">Criar outro</button>
+      </div>
+    </form>
+  </section>
+</main>
+<footer>© DS 3D PRINT · Vila Nova de Famalicão · As cores no ecrã são aproximadas.</footer>
+
+<script type="module">
+import { gerar, glbDe, tresMFDe } from '/personalizar/gerador.js';
+
+const SB_URL = 'https://wxwdvixxcrduzneqjfwo.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM';
+const WHATSAPP = '351911780404';
+
+const FONTES = [
+  { id:'fredoka',   nome:'Redonda',    css:'700 "Fredoka"' },
+  { id:'pacifico',  nome:'Manuscrita', css:'400 "Pacifico"' },
+  { id:'lobster',   nome:'Clássica',   css:'400 "Lobster"' },
+  { id:'baloo',     nome:'Gordinha',   css:'800 "Baloo 2"' },
+  { id:'righteous', nome:'Moderna',    css:'400 "Righteous"' },
+  { id:'bebas',     nome:'Maiúsculas', css:'400 "Bebas Neue"' },
+];
+const CORES = [
+  { nome:'Branco',   hex:'#eeeeea' }, { nome:'Preto', hex:'#1d1d1f' }, { nome:'Cinza', hex:'#8a8a8d' },
+  { nome:'Vermelho', hex:'#c8231c' }, { nome:'Laranja', hex:'#f07a1a' }, { nome:'Amarelo', hex:'#f2c418' },
+  { nome:'Verde',    hex:'#2e9b48' }, { nome:'Azul', hex:'#1f3f9a' }, { nome:'Azul-claro', hex:'#4aa8e8' },
+  { nome:'Rosa',     hex:'#ef7fb0' }, { nome:'Roxo', hex:'#7442b8' }, { nome:'Dourado', hex:'#c9a14a', metal:0.55, rough:0.38 },
+];
+const $ = (id) => document.getElementById(id);
+const st = { tipo:'porta-chaves', fonte:'fredoka', corBase:'Azul', corTexto:'Branco' };
+
+// valores vindos do link (ex.: /personalizar?texto=Joana&tipo=iman&fonte=pacifico&base=Rosa&letras=Branco)
+const q = new URLSearchParams(location.search);
+if (q.get('texto')) $('texto').value = q.get('texto').slice(0, 16);
+if (['porta-chaves','iman'].includes(q.get('tipo'))) st.tipo = q.get('tipo');
+if (FONTES.some(f => f.id === q.get('fonte'))) st.fonte = q.get('fonte');
+const corQ = (v) => CORES.find(c => c.nome.toLowerCase() === String(v || '').toLowerCase());
+if (corQ(q.get('base'))) st.corBase = corQ(q.get('base')).nome;
+if (corQ(q.get('letras'))) st.corTexto = corQ(q.get('letras')).nome;
+if (+q.get('tamanho') >= 8 && +q.get('tamanho') <= 24) $('tamanho').value = +q.get('tamanho');
+
+// ------------- construir os controlos
+const tipoBtns = [...$('tipo').querySelectorAll('button')];
+tipoBtns.forEach(b => b.onclick = () => { st.tipo = b.dataset.tipo; sync(); regen(); });
+FONTES.forEach(f => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'fonte'; b.dataset.id = f.id;
+  b.style.font = f.css.replace(/^(\d+)\s*/, '$1 21px ').replace(/"$/, '", sans-serif');
+  b.title = f.nome; b.setAttribute('aria-label', 'Letra ' + f.nome);
+  b.onclick = () => { st.fonte = f.id; sync(); regen(); };
+  $('fontes').appendChild(b);
+});
+const corGrid = (el, key) => CORES.forEach(c => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'cor'; b.style.background = c.hex; b.title = c.nome; b.setAttribute('aria-label', c.nome);
+  b.onclick = () => { st[key] = c.nome; sync(); pintar(); };
+  el.appendChild(b);
+});
+corGrid($('corBase'), 'corBase'); corGrid($('corTexto'), 'corTexto');
+
+function sync() {
+  tipoBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.tipo === st.tipo));
+  const txt = $('texto').value.trim() || 'Nome';
+  const amostra = txt.split(/\s+/)[0].slice(0, 9);
+  [...$('fontes').children].forEach(b => { b.textContent = amostra; b.setAttribute('aria-pressed', b.dataset.id === st.fonte); });
+  [...$('corBase').children].forEach(b => b.setAttribute('aria-pressed', b.title === st.corBase));
+  [...$('corTexto').children].forEach(b => b.setAttribute('aria-pressed', b.title === st.corTexto));
+  $('titulo').textContent = st.tipo === 'iman' ? 'Cria o teu íman' : 'Cria o teu porta-chaves';
+  $('tamanhoOut').textContent = $('tamanho').value + ' mm';
+}
+
+// ------------- gerar a peça
+const mv = $('mv');
+let ultimo = null, blobUrl = null, timer = null, geracao = 0;
+const cor = (nome) => CORES.find(c => c.nome === nome);
+async function regen() {
+  clearTimeout(timer);
+  timer = setTimeout(async () => {
+    const minha = ++geracao;
+    const texto = $('texto').value.trim();
+    if (!texto) { $('aviso').textContent = 'Escreve um nome ou texto.'; return; }
+    $('busy').hidden = false;
+    const f = FONTES.find(x => x.id === st.fonte);
+    try {
+      await document.fonts.load(f.css.replace(/^(\d+)\s*/, '$1 40px '), texto);
+      if (minha !== geracao) return;
+      const r = gerar({ texto, fonte: f.css, tipo: st.tipo, alturaLetra: +$('tamanho').value });
+      ultimo = { r, texto, fonte: f, tipo: st.tipo, altura: +$('tamanho').value };
+      const glb = glbDe(r, cor(st.corBase), cor(st.corTexto));
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      blobUrl = URL.createObjectURL(new Blob([glb], { type: 'model/gltf-binary' }));
+      mv.setAttribute('src', blobUrl);
+      $('mL').textContent = Math.round(r.medidas.largura) + ' mm';
+      $('mA').textContent = Math.round(r.medidas.altura) + ' mm';
+      $('mE').textContent = String(r.medidas.espessura).replace('.', ',') + ' mm';
+      const limite = st.tipo === 'iman' ? 100 : 90;
+      $('aviso').textContent = r.medidas.largura > limite ? `Fica com ${Math.round(r.medidas.largura)} mm de comprimento. Para ${st.tipo === 'iman' ? 'um íman' : 'um porta-chaves'} recomendamos até ${limite} mm: reduz a altura das letras ou o texto.` : '';
+    } catch (e) {
+      $('aviso').textContent = 'Não foi possível criar esta peça: ' + e.message;
+    } finally { if (minha === geracao) $('busy').hidden = true; }
+  }, 180);
+}
+function pintar() {
+  if (!mv.model) return regen();
+  const set = (nome, c) => { const m = mv.model.getMaterialByName(nome); if (!m) return; const lin = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255].map(v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); };
+    m.pbrMetallicRoughness.setBaseColorFactor([...lin(c.hex), 1]); m.pbrMetallicRoughness.setMetallicFactor(c.metal || 0); m.pbrMetallicRoughness.setRoughnessFactor(c.rough ?? 0.6); };
+  set('base', cor(st.corBase)); set('texto', cor(st.corTexto));
+}
+$('texto').addEventListener('input', () => { sync(); regen(); });
+$('tamanho').addEventListener('input', () => { sync(); regen(); });
+$('menos').onclick = () => { $('qtd').value = Math.max(1, (+$('qtd').value || 1) - 1); };
+$('mais').onclick = () => { $('qtd').value = Math.min(999, (+$('qtd').value || 1) + 1); };
+
+// ------------- encomendar
+function resumo() {
+  const u = ultimo; if (!u) return '';
+  return `${u.tipo === 'iman' ? 'Íman' : 'Porta-chaves'} "${u.texto}" · letra ${u.fonte.nome} · ${u.altura} mm · base ${st.corBase} / letras ${st.corTexto} · ` +
+         `${Math.round(u.r.medidas.largura)}×${Math.round(u.r.medidas.altura)}×${u.r.medidas.espessura} mm · quantidade ${+$('qtd').value || 1}`;
+}
+function linkConfig() {
+  const u = ultimo; const p = new URLSearchParams({ texto: u.texto, tipo: u.tipo, fonte: u.fonte.id, tamanho: u.altura, base: st.corBase, letras: st.corTexto });
+  return `${location.origin}/personalizar?${p}`;
+}
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!ultimo) return;
+  const nome = $('nome').value.trim(), tel = $('tel').value.trim();
+  if (!nome || tel.replace(/\D/g, '').length < 9) { $('estado').textContent = 'Escreve o teu nome e um telemóvel válido.'; $('estado').classList.add('erro'); return; }
+  $('enviar').disabled = true; $('estado').classList.remove('erro'); $('estado').textContent = 'A enviar o pedido…';
+  const desc = resumo() + (($('obs').value.trim()) ? `\n\nNotas: ${$('obs').value.trim()}` : '') + `\n\nVer/alterar: ${linkConfig()}`;
+  try {
+    const dia = new Date().toISOString().slice(0, 10);
+    const path = `personalizados/${dia}-${crypto.randomUUID()}.3mf`;
+    const mf = tresMFDe(ultimo.r, `${ultimo.tipo} ${ultimo.texto}`, `Base (${st.corBase})`, `Letras (${st.corTexto})`);
+    const up = await fetch(`${SB_URL}/storage/v1/object/orcamentos/${path}`, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/octet-stream', 'x-upsert': 'false' }, body: mf });
+    if (!up.ok) throw new Error('upload ' + up.status);
+    const ins = await fetch(`${SB_URL}/rest/v1/pedidos_orcamento`, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ nome, contacto: tel, material: `PLA · base ${st.corBase} / letras ${st.corTexto}`, quantidade: +$('qtd').value || 1, descricao: desc, ficheiro_path: path }) });
+    if (!ins.ok) throw new Error('pedido ' + ins.status);
+    $('encomenda').hidden = true; $('sucesso').hidden = false;
+    $('sucessoTxt').textContent = `Obrigado, ${nome.split(' ')[0]}! Vamos responder-te em breve com o preço e o prazo.`;
+    $('waBtn').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Olá DS 3D PRINT! Acabei de pedir: ${resumo()}. ${linkConfig()}`)}`;
+  } catch (err) {
+    $('estado').classList.add('erro');
+    $('estado').textContent = 'Não foi possível enviar agora. Usa o botão do WhatsApp em baixo ou tenta outra vez.';
+    $('sucesso').hidden = false; $('outro').hidden = true; $('sucesso').querySelector('strong').textContent = 'Envia por WhatsApp';
+    $('sucessoTxt').textContent = 'Os detalhes da tua peça já vão escritos na mensagem.';
+    $('waBtn').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Olá DS 3D PRINT! Quero encomendar: ${resumo()}. ${linkConfig()}`)}`;
+  } finally { $('enviar').disabled = false; }
+});
+$('outro').onclick = () => { $('sucesso').hidden = true; $('encomenda').hidden = false; $('estado').textContent = ''; $('texto').focus(); };
+
+sync(); regen();
+</script>
+</body>
+</html>
