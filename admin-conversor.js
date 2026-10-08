@@ -224,7 +224,7 @@ function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 10139
 function gauss(r) { let u = 0, v = 0; while (!u) u = r(); v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 
 export async function convert(buf, filename, opts = {}) {
-  const maxTris = opts.maxTris ?? 120000, jitterMM = opts.jitterMM ?? 0.15;
+  const maxTris = opts.maxTris ?? 350000, jitterMM = opts.jitterMM ?? 0.15;
   const is3mf = /\.3mf$/i.test(filename);
   const { tris, palette } = is3mf ? await read3MF(buf) : readSTL(buf);
   const R = rng(7);
