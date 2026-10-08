@@ -147,6 +147,15 @@ button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-
         <div class="qtd"><button type="button" id="menos" aria-label="Menos uma">−</button><input type="number" id="qtd" min="1" max="999" value="1"><button type="button" id="mais" aria-label="Mais uma">+</button></div>
       </fieldset>
 
+      <div class="encomenda admin-dl" id="adminDl" hidden>
+        <h2>Ficheiros para imprimir</h2>
+        <p class="note">Só aparece porque tens sessão iniciada no admin. Os clientes não veem esta caixa.</p>
+        <div class="duo">
+          <button class="btn btn-primary" type="button" id="dl3mf">Descarregar 3MF (2 cores)</button>
+          <button class="btn" type="button" id="dlStl" style="background:var(--panel);color:var(--text);border:1px solid var(--line)">Descarregar STL (base + letras)</button>
+        </div>
+      </div>
+
       <div class="encomenda" id="encomenda">
         <h2>Encomendar</h2>
         <div class="duo">
@@ -171,7 +180,7 @@ button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-
 <footer>© DS 3D PRINT · Vila Nova de Famalicão · As cores no ecrã são aproximadas.</footer>
 
 <script type="module">
-import { gerar, glbDe, tresMFDe } from '/personalizar/gerador.js';
+import { gerar, glbDe, tresMFDe, stlDe } from '/personalizar/gerador.js';
 
 const SB_URL = 'https://wxwdvixxcrduzneqjfwo.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2R2aXh4Y3JkdXpuZXFqZndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTg0MDEsImV4cCI6MjA4Nzc5NDQwMX0.WKs7b9PMec_AxbU2TThK_TdiyhN8pamiUFN1H2z36aM';
@@ -312,6 +321,30 @@ $('form').addEventListener('submit', async (e) => {
   } finally { $('enviar').disabled = false; }
 });
 $('outro').onclick = () => { $('sucesso').hidden = true; $('encomenda').hidden = false; $('estado').textContent = ''; $('texto').focus(); };
+
+// ------------- descarregar (só para quem tem sessão no admin)
+const nomeFicheiro = () => {
+  const u = ultimo; const base = `${u.tipo === 'iman' ? 'iman' : 'porta-chaves'}_${u.texto}_${u.fonte.id}_${u.altura}mm`;
+  return base.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w.-]+/g, '_');
+};
+const descarregar = (bytes, nome) => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' })); a.download = nome;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+};
+$('dl3mf').onclick = () => { if (!ultimo) return; descarregar(tresMFDe(ultimo.r, `${ultimo.tipo} ${ultimo.texto}`, `Base (${st.corBase})`, `Letras (${st.corTexto})`), nomeFicheiro() + '.3mf'); };
+$('dlStl').onclick = () => {
+  if (!ultimo) return; const n = nomeFicheiro();
+  descarregar(stlDe(ultimo.r.base, 'base ' + ultimo.texto), n + '_base.stl');
+  setTimeout(() => descarregar(stlDe(ultimo.r.letras, 'letras ' + ultimo.texto), n + '_letras.stl'), 400);
+};
+(async () => {
+  try {
+    const raw = localStorage.getItem('sb-wxwdvixxcrduzneqjfwo-auth-token'); if (!raw) return;
+    const tok = JSON.parse(raw).access_token; if (!tok) return;
+    const r = await fetch(`${SB_URL}/auth/v1/user`, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + tok } });
+    if (r.ok) $('adminDl').hidden = false;
+  } catch {}
+})();
 
 sync(); regen();
 </script>

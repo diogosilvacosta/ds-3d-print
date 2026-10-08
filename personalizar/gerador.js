@@ -452,3 +452,19 @@ export function glbDe(r, corBase, corTexto) {
 export function tresMFDe(r, titulo, nomeBase = 'Base', nomeTexto = 'Texto') {
   return to3MF([{ mesh: r.base, nome: nomeBase }, { mesh: r.letras, nome: nomeTexto }], titulo);
 }
+
+// STL binário de uma parte (mm, Z para cima)
+export function stlDe(mesh, nome = 'DS 3D PRINT') {
+  const n = mesh.idx.length / 3, out = new Uint8Array(84 + 50 * n), dv = new DataView(out.buffer);
+  const hdr = new TextEncoder().encode(('DS 3D PRINT ' + nome).slice(0, 79)); out.set(hdr, 0);
+  dv.setUint32(80, n, true);
+  const P = mesh.pos;
+  for (let t = 0; t < n; t++) {
+    const o = 84 + 50 * t, a = mesh.idx[3 * t] * 3, b = mesh.idx[3 * t + 1] * 3, c = mesh.idx[3 * t + 2] * 3;
+    const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2], vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const l = Math.hypot(nx, ny, nz) || 1;
+    dv.setFloat32(o, nx / l, true); dv.setFloat32(o + 4, ny / l, true); dv.setFloat32(o + 8, nz / l, true);
+    [a, b, c].forEach((v, k) => { dv.setFloat32(o + 12 + 12 * k, P[v], true); dv.setFloat32(o + 16 + 12 * k, P[v + 1], true); dv.setFloat32(o + 20 + 12 * k, P[v + 2], true); });
+  }
+  return out;
+}
