@@ -311,7 +311,15 @@
 
         async function copiar(txt, btn) {
             try { await navigator.clipboard.writeText(txt); const o = btn.innerHTML; btn.innerHTML = '<i class="fas fa-check"></i> Copiado'; setTimeout(() => btn.innerHTML = o, 1500); }
-            catch { prompt("Copia o link:", txt); }
+            catch {
+                // alternativa quando o browser recusa a area de transferencia
+                const t = document.createElement("textarea"); t.value = txt; t.style.position = "fixed"; t.style.opacity = "0";
+                document.body.appendChild(t); t.select();
+                let ok = false; try { ok = document.execCommand("copy"); } catch {}
+                t.remove();
+                const o = btn.innerHTML; btn.innerHTML = ok ? '<i class="fas fa-check"></i> Copiado' : "Seleciona o link e copia";
+                setTimeout(() => btn.innerHTML = o, 2000);
+            }
         }
 
         // ---------- lista ----------
