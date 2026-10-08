@@ -2,7 +2,7 @@
 import { convert } from './admin-conversor.js';
 self.onmessage = async (e) => {
     try {
-        const r = await convert(e.data.buf, e.data.name);
+        const r = await convert(e.data.buf, e.data.name, { onProgress: (p) => self.postMessage({ progress: p }) });
         self.postMessage({ ok: true, ...r }, [r.glb.buffer]);
     } catch (err) {
         self.postMessage({ ok: false, error: err && err.message ? err.message : String(err) });

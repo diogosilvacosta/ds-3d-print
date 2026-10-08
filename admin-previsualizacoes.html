@@ -232,7 +232,7 @@
                 const buf = await f.arrayBuffer();
                 const r = await new Promise((resolve, reject) => {
                     const w = new Worker("admin-conversor-worker.js", { type: "module" });
-                    w.onmessage = (e) => { w.terminate(); e.data.ok ? resolve(e.data) : reject(new Error(e.data.error)); };
+                    w.onmessage = (e) => { if (e.data.progress != null) { setStatus(`Modelo grande: a simplificar sem perder pormenor... ${Math.round(e.data.progress * 100)}%`); return; } w.terminate(); e.data.ok ? resolve(e.data) : reject(new Error(e.data.error)); };
                     w.onerror = (e) => { w.terminate(); reject(new Error(e.message || "Falha na conversao.")); };
                     w.postMessage({ buf, name: f.name }, [buf]);
                 });

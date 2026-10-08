@@ -1,3 +1,4 @@
+import { simplificarQEM } from './qem.js';
 // DS 3D PRINT — conversor STL/3MF -> GLB de pré-visualização (corre no browser e no Node 18+)
 // - escala real (mm -> m), Y para cima, centrado, assente no chão
 // - 3MF: cores dos filamentos (Bambu/Orca/Prusa), peças, transformações e pintura multicor
@@ -258,14 +259,16 @@ export async function convert(buf, filename, opts = {}) {
     for (let i = 0; i < P.length; i++) { P[i][0]/=cnt[i]; P[i][1]/=cnt[i]; P[i][2]/=cnt[i]; }
     return { P, F };
   };
-  let res;
-  if (nIn > maxTris) {
-    // nº de triângulos ~ 1/célula²: estimar e afinar em poucas passagens
-    let c = maxSide / 250; res = clusterOnce(c);
-    for (let it = 0; it < 4 && Math.abs(res.F.length - maxTris) / maxTris > 0.1; it++) {
-      c *= Math.sqrt(res.F.length / maxTris); res = clusterOnce(c);
+  let res = clusterOnce(0);   // soldar vértices iguais
+  if (res.F.length > maxTris) {
+    // modelos enormes: primeiro uma grelha muito fina (rápida) até ~3x o alvo, depois a simplificação "inteligente"
+    if (res.F.length > 4 * maxTris) {
+      let c = maxSide / 1500, r2 = clusterOnce(c);
+      for (let it = 0; it < 5 && r2.F.length > 3.5 * maxTris; it++) { c *= Math.sqrt(r2.F.length / (3 * maxTris)); r2 = clusterOnce(c); }
+      res = r2;
     }
-  } else res = clusterOnce(0);
+    res = simplificarQEM(res.P, res.F, maxTris, opts.onProgress);
+  }
   let { P, F } = res;
   const decimated = nIn > maxTris;
 
