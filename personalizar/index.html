@@ -339,10 +339,21 @@ $('dlStl').onclick = () => {
 };
 (async () => {
   try {
-    const raw = localStorage.getItem('sb-wxwdvixxcrduzneqjfwo-auth-token'); if (!raw) return;
-    const tok = JSON.parse(raw).access_token; if (!tok) return;
-    const r = await fetch(`${SB_URL}/auth/v1/user`, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + tok } });
-    if (r.ok) $('adminDl').hidden = false;
+    const KEY = 'sb-wxwdvixxcrduzneqjfwo-auth-token';
+    const raw = localStorage.getItem(KEY); if (!raw) return;
+    let sess = JSON.parse(raw); if (!sess || !sess.access_token) return;
+    const valida = async (tok) => (await fetch(`${SB_URL}/auth/v1/user`, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + tok } })).ok;
+    let ok = await valida(sess.access_token);
+    if (!ok && sess.refresh_token) {   // acesso expirado: renovar como o admin faz e guardar a sessão nova
+      const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=refresh_token`, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: sess.refresh_token }) });
+      if (r.ok) {
+        const n = await r.json();
+        sess = { ...sess, ...n, expires_at: n.expires_at || Math.floor(Date.now() / 1000) + (n.expires_in || 3600) };
+        localStorage.setItem(KEY, JSON.stringify(sess));
+        ok = await valida(sess.access_token);
+      }
+    }
+    if (ok) $('adminDl').hidden = false;
   } catch {}
 })();
 
